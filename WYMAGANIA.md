@@ -2,7 +2,7 @@
 
 Aplikacja „karaoke do kolęd” na spotkania świąteczne. Uruchamiana na PC podłączonym do telewizora, uczestnicy biorą udział przez swoje smartfony.
 
-Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementacja jeszcze nie rozpoczęta.
+Status: **szkic wymagań** (wersja 0.4 — wszystkie pytania otwarte rozstrzygnięte). Implementacja jeszcze nie rozpoczęta.
 
 ---
 
@@ -20,7 +20,7 @@ Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementa
 |---|---|---|
 | **Gospodarz** | PC + TV | uruchamia sesję, wybiera motyw, steruje odtwarzaniem, włącza podkład i ustawia tonację, uruchamia głosowanie lub losowanie |
 | **Uczestnik** | smartfon | dołącza do sesji, głosuje na następną kolędę, widzi tekst kolędy zsynchronizowany z TV |
-| **Dyrygent** | smartfon | uczestnik wskazany przez gospodarza; przełącza wersy z telefonu (gdy tekst nie jest przewijany automatycznie) |
+| **Dyrygent** | smartfon | dowolny uczestnik, który przejął rolę; przełącza wersy z telefonu (gdy tekst nie jest przewijany automatycznie) |
 
 ## 3. Wymagania funkcjonalne
 
@@ -53,7 +53,7 @@ Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementa
 - **F17.** Aplikacja **nasłuchuje przez mikrofon** i na tej podstawie **przewija tekst** do aktualnie śpiewanego miejsca.
 - **F18.** **Tryby przechodzenia do następnego wersu** (wybiera gospodarz, można zmienić w trakcie kolędy):
   - **automatyczny** — wg śledzenia śpiewu, zapisanego tempa lub podkładu,
-  - **z telefonu** — wersy przełącza **dyrygent** (wskazany uczestnik) dużym przyciskiem „następny wers” na telefonie; gospodarz może przekazać rolę dyrygenta innej osobie,
+  - **z telefonu** — wersy przełącza **dyrygent** dużym przyciskiem „następny wers” na telefonie; **każdy uczestnik może przejąć rolę dyrygenta** jednym kliknięciem („Zostań dyrygentem”), na TV widać, kto aktualnie dyryguje; w danej chwili dyrygent jest jeden,
   - zawsze dostępne jest ręczne sterowanie z PC (strzałki / pilot).
 - **F19.** Możliwość zatrzymania, cofnięcia o wers, przejścia do następnej zwrotki, zakończenia kolędy.
 - **F20.** **Tekst na telefonach:** w trakcie kolędy telefon uczestnika pokazuje tekst zsynchronizowany z TV (wyróżniony bieżący wers, auto-przewijanie), z możliwością powiększenia czcionki.
@@ -104,14 +104,17 @@ Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementa
 - **N2. Telefony:** strona uczestnika działa w mobilnym Safari i Chrome, bez instalacji; widok głosowania i widok tekstu czytelne w pionie.
 - **N3. Opóźnienia:** głos → TV < 1 s; synchronizacja tekstu TV ↔ telefony < 0,5 s; przewijanie płynne (bez skoków).
 - **N4. Prywatność:** dźwięk z mikrofonu analizowany lokalnie w przeglądarce, **nie jest nagrywany ani wysyłany** na serwer — na serwer trafiają tylko wyniki liczbowe.
-- **N5. Hosting:** domena **505844.xyz**, serwer własny na **Oracle Cloud**. HTTPS wymagany (m.in. do dostępu do mikrofonu i połączeń WebSocket z telefonów); serwer obsługuje wiele równoległych sesji różnych grup.
+- **N5. Hosting:** adres **https://kolednik.505844.xyz**, serwer własny na **Oracle Cloud**, ruch przez **reverse proxy Cloudflare**. HTTPS wymagany (m.in. do dostępu do mikrofonu i połączeń WebSocket z telefonów); serwer obsługuje wiele równoległych sesji różnych grup.
 - **N6. Prostota startu:** od otwarcia strony do pierwszej kolędy — maks. kilka kliknięć.
 - **N7. Odporność na zerwanie połączenia:** telefon, który stracił połączenie, automatycznie wraca do sesji; chwilowy brak internetu nie przerywa śpiewania na TV.
 
 ## 5. Uwagi techniczne (wstępne, do decyzji)
 
 - **Architektura:** frontend (ekran TV + widok telefonu) + serwer z **WebSocketami** do sesji, głosowania i synchronizacji tekstu (np. Node.js) + baza danych na rekordy i historię (wystarczy SQLite).
-- **Wdrożenie na Oracle Cloud:** VM (np. darmowa instancja Ampere/ARM), aplikacja w kontenerze Docker, przed nią reverse proxy (np. **Caddy** — automatyczne certyfikaty Let's Encrypt i obsługa WebSocketów). W Oracle Cloud trzeba otworzyć porty 80/443 zarówno w *Security List* / NSG, jak i w firewallu systemu (iptables/firewalld). Rekord DNS A (lub subdomena) 505844.xyz → publiczny IP VM.
+- **Wdrożenie:** aplikacja na VM w Oracle Cloud nasłuchuje na **własnym porcie** (konfigurowalny przez zmienną środowiskową `PORT`), opcjonalnie w kontenerze Docker. Przed nią **Cloudflare** jako reverse proxy dla subdomeny `kolednik.505844.xyz` — TLS/HTTPS załatwia Cloudflare.
+  - Jeśli to **Cloudflare Tunnel** (`cloudflared`): port może być dowolny i nie trzeba otwierać portów w Oracle Cloud.
+  - Jeśli to zwykły rekord DNS z „pomarańczową chmurką”: Cloudflare przekazuje ruch tylko na określone porty (np. 443, 8443, 2053, 2083, 2087, 2096 dla HTTPS) — port aplikacji trzeba dobrać z tej listy i otworzyć go w *Security List* / NSG oraz w firewallu systemu.
+  - **WebSockety** przez Cloudflare działają, ale bezczynne połączenie jest zrywane po ok. 100 s — aplikacja musi wysyłać heartbeat (ping) i automatycznie się łączyć ponownie (patrz N7).
 - **Bezpieczeństwo „konta” bez logowania:** kto zna nazwę grupy, widzi i dopisuje jej rekordy — przy domowym użyciu akceptowalne; w razie potrzeby później można dodać opcjonalny PIN.
 - **Podkład i tonacja:** najprościej podkłady jako **MIDI** (lub inny zapis nutowy) odtwarzane syntezatorem w przeglądarce — zmiana tonacji i tempa jest wtedy bezstratna i trywialna, a melodie kolęd są w domenie publicznej. Alternatywa: nagrania audio + pitch-shifting (gorsza jakość przy dużych zmianach, trudniejsze licencyjnie).
 - **Śledzenie śpiewu:** rozpoznawanie mowy (Web Speech API) słabo radzi sobie ze śpiewem grupowym. Realistyczne podejście hybrydowe:
@@ -140,22 +143,23 @@ Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementa
 | 12 | Kto przełącza wersy? | Automatycznie (opcja) albo dyrygent z telefonu |
 | 13 | Zakres listy zaśpiewanych? | Jeden wieczór (sesja) |
 | 14 | Hosting? | 505844.xyz, własny serwer na Oracle Cloud |
+| 15 | Adres aplikacji? | kolednik.505844.xyz |
+| 16 | Proxy / port? | Aplikacja na własnym porcie, reverse proxy przez Cloudflare |
+| 17 | Kto może zostać dyrygentem? | Każdy uczestnik |
 
 ## 7. Otwarte pytania
 
-1. Pod jakim adresem ma działać aplikacja: bezpośrednio **505844.xyz** czy subdomena (np. **kolednik.505844.xyz**)?
-2. Czy na serwerze Oracle działa już coś innego (np. inny reverse proxy / Docker), z czym trzeba się zgrać?
-3. Dyrygent: wskazuje go gospodarz, czy rolę może przejąć każdy uczestnik jednym kliknięciem?
+Brak — wymagania gotowe do zaplanowania implementacji.
 
 ## 8. Proponowany zakres MVP
 
-1. Kafelki kolęd + ekran śpiewania z wyróżnionym wersem, wszystkie zwrotki; przewijanie automatyczne wg tempa albo przez dyrygenta z telefonu.
+1. Kafelki kolęd + ekran śpiewania z wyróżnionym wersem, wszystkie zwrotki; przewijanie automatyczne wg tempa albo przez dyrygenta z telefonu (każdy może przejąć rolę).
 2. Głosowanie z telefonów przez QR na niezaśpiewane kolędy + wyniki na żywo; losowanie (tryb ręczny i przy remisie).
 3. Tekst kolędy zsynchronizowany na telefonach.
 4. 2–3 motywy kolorystyczne.
 5. Kolędometr (głośność w dB + wynik w formie gwiazdek/świeczek) dla całej grupy.
 6. „Konto” grupy przez wpisanie nazwy, zapis rekordów na serwerze + animacja „nowy rekord”.
-7. Wdrożenie na Oracle Cloud pod 505844.xyz (Docker + Caddy, HTTPS).
+7. Wdrożenie na Oracle Cloud pod kolednik.505844.xyz (własny port, reverse proxy Cloudflare).
 8. Narrator TTS czytający kolejny wers wg czasu.
 
 Etap 2: podkład muzyczny (MIDI) z regulacją tonacji i tempa, śledzenie śpiewu z mikrofonu, narrator reagujący na śpiew, Złota księga / historia sesji, własne kolędy.
