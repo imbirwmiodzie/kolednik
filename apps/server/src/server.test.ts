@@ -1,7 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { io as connect, type Socket } from 'socket.io-client';
 import type { AddressInfo } from 'node:net';
-import { flattenSong, type ClientToServerEvents, type PublicState, type ServerToClientEvents } from '@kolednik/shared';
+import {
+  flattenSong,
+  type ClientToServerEvents,
+  type PublicState,
+  type ServerToClientEvents,
+} from '@kolednik/shared';
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 import { SongLibrary } from './songs/library.js';
@@ -49,7 +54,10 @@ describe('sesja przez Socket.IO', () => {
     await new Promise<void>((r) => c.once('connect', () => r()));
     return c;
   };
-  const nextState = async (c: Client, pred: (s: PublicState) => boolean = () => true): Promise<PublicState> => {
+  const nextState = async (
+    c: Client,
+    pred: (s: PublicState) => boolean = () => true,
+  ): Promise<PublicState> => {
     const q = queues.get(c)!;
     for (;;) {
       const s = q.states.shift();
@@ -73,9 +81,21 @@ describe('sesja przez Socket.IO', () => {
 
     const p1 = await client();
     const p2 = await client();
-    expect((await p1.emitWithAck('phone:join', { code: lobby.code.toLowerCase(), clientId: 'phone-0001', nick: 'Ania' })).ok).toBe(true);
-    expect((await p2.emitWithAck('phone:join', { code: lobby.code, clientId: 'phone-0002', nick: '' })).ok).toBe(true);
-    expect((await p1.emitWithAck('phone:join', { code: 'ZZZZ', clientId: 'phone-0003', nick: '' })).ok).toBe(false);
+    expect(
+      (
+        await p1.emitWithAck('phone:join', {
+          code: lobby.code.toLowerCase(),
+          clientId: 'phone-0001',
+          nick: 'Ania',
+        })
+      ).ok,
+    ).toBe(true);
+    expect(
+      (await p2.emitWithAck('phone:join', { code: lobby.code, clientId: 'phone-0002', nick: '' })).ok,
+    ).toBe(true);
+    expect((await p1.emitWithAck('phone:join', { code: 'ZZZZ', clientId: 'phone-0003', nick: '' })).ok).toBe(
+      false,
+    );
 
     // Głosowanie: obaj głosują → koniec przed czasem.
     const voting = nextState(tv, (s) => s.phase === 'VOTING');
@@ -106,7 +126,14 @@ describe('sesja przez Socket.IO', () => {
     expect(await step).toEqual({ delta: 1 });
 
     const metrics = {
-      score: 72, aboveNoiseDb: 20, displayDb: 55, peakDb: 30, coverage: 0.9, stars: 4, candles: 7, title: 'x',
+      score: 72,
+      aboveNoiseDb: 20,
+      displayDb: 55,
+      peakDb: 30,
+      coverage: 0.9,
+      stars: 4,
+      candles: 7,
+      title: 'x',
     };
     const summary = nextState(tv, (s) => s.phase === 'SUMMARY');
     tv.emit('host:song:finish', { metrics });
@@ -144,7 +171,9 @@ describe('sesja przez Socket.IO', () => {
     if (!created.ok) throw new Error(created.error);
     tv.close();
     const tv2 = await client();
-    expect((await tv2.emitWithAck('host:resume', { sessionId: created.sessionId, hostToken: 'zły' })).ok).toBe(false);
+    expect(
+      (await tv2.emitWithAck('host:resume', { sessionId: created.sessionId, hostToken: 'zły' })).ok,
+    ).toBe(false);
     expect((await tv2.emitWithAck('host:resume', created)).ok).toBe(true);
   });
 });

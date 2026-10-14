@@ -93,7 +93,7 @@ export class Session {
   endVote(rng?: () => number): boolean {
     if (this.phase !== 'VOTING' || !this.vote) return false;
     const r = resolveVote(this.vote.ballots.values(), this.pool(), rng);
-    this.reveal = { ...r, via: 'vote' };
+    this.reveal = { ...r, via: 'vote', noVotes: this.vote.ballots.size === 0 };
     this.vote = null;
     this.phase = 'REVEAL';
     return true;
@@ -185,7 +185,11 @@ export class Session {
       groupName: this.groupName,
       theme: this.theme,
       phase: this.phase,
-      participants: [...this.participants].map(([id, p]) => ({ id, nick: p.nick, connected: p.connected > 0 })),
+      participants: [...this.participants].map(([id, p]) => ({
+        id,
+        nick: p.nick,
+        connected: p.connected > 0,
+      })),
       hostConnected: this.hostSockets > 0,
       sung: [...this.sung],
       vote: this.vote ? { endsAt: this.vote.endsAt, counts, voters: this.vote.ballots.size } : null,

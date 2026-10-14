@@ -77,15 +77,15 @@ export class Db {
 
   createSession(s: Omit<SessionRow, 'display_name'>) {
     this.db
-      .prepare('INSERT INTO sessions (id, group_id, code, host_token, theme, started_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .prepare(
+        'INSERT INTO sessions (id, group_id, code, host_token, theme, started_at) VALUES (?, ?, ?, ?, ?, ?)',
+      )
       .run(s.id, s.group_id, s.code, s.host_token, s.theme, s.started_at);
   }
 
   getSession(id: string): SessionRow | undefined {
     return this.db
-      .prepare(
-        `SELECT s.*, g.display_name FROM sessions s JOIN groups g ON g.id = s.group_id WHERE s.id = ?`,
-      )
+      .prepare(`SELECT s.*, g.display_name FROM sessions s JOIN groups g ON g.id = s.group_id WHERE s.id = ?`)
       .get(id) as SessionRow | undefined;
   }
 

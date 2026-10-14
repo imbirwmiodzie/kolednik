@@ -1,0 +1,9 @@
+# Przykład dla Cloudflare Tunnel (cloudflared) — wtedy nie trzeba otwierać portów w Oracle Cloud.
+# cloudflared tunnel create kolednik
+# cloudflared tunnel route dns kolednik kolednik.505844.xyz
+tunnel: kolednik
+credentials-file: /etc/cloudflared/kolednik.json
+ingress:
+  - hostname: kolednik.505844.xyz
+    service: http://127.0.0.1:3000
+  - service: http_status:404

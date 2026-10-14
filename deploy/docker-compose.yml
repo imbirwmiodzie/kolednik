@@ -1,0 +1,16 @@
+# Uruchomienie na serwerze:  cd deploy && docker compose up -d
+# Port na hoście ustawia KOLEDNIK_PORT (domyślnie 3000) — na niego wskazuje Cloudflare.
+services:
+  kolednik:
+    image: ghcr.io/imbirwmiodzie/kolednik:latest
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '${KOLEDNIK_BIND:-127.0.0.1}:${KOLEDNIK_PORT:-3000}:3000'
+    volumes:
+      - kolednik-data:/data
+
+volumes:
+  kolednik-data:

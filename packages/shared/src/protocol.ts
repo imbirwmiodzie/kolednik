@@ -21,6 +21,8 @@ export type Reveal = {
   via: 'vote' | 'random';
   candidates: string[];
   viaTiebreak: boolean;
+  /** Nikt nie zagłosował — losowanie z całej puli. */
+  noVotes?: boolean;
 };
 
 export type RecordInfo = { previousBest: number | null; previousAt: number | null; isNew: boolean };
@@ -59,14 +61,23 @@ export type PerformanceInput = {
   tempo?: number;
 };
 
-export type BookEntry = { slug: string; best: number | null; bestAt: number | null; times: number; lastAt: number };
+export type BookEntry = {
+  slug: string;
+  best: number | null;
+  bestAt: number | null;
+  times: number;
+  lastAt: number;
+};
 export type BookEvening = { sessionId: string; startedAt: number; songs: number; avgScore: number | null };
 export type Book = { groupName: string; records: BookEntry[]; evenings: BookEvening[] };
 
 export interface ClientToServerEvents {
   'time:ping': (ack: (serverNow: number) => void) => void;
 
-  'host:create': (p: { groupName: string; theme: ThemeId }, ack: Ack<{ sessionId: string; hostToken: string }>) => void;
+  'host:create': (
+    p: { groupName: string; theme: ThemeId },
+    ack: Ack<{ sessionId: string; hostToken: string }>,
+  ) => void;
   'host:resume': (p: { sessionId: string; hostToken: string }, ack: Ack) => void;
   'host:theme': (p: { theme: ThemeId }) => void;
   'host:vote:start': (p: { durationSec: number }) => void;
@@ -81,7 +92,10 @@ export interface ClientToServerEvents {
   'host:reset-sung': () => void;
   'host:book': (ack: Ack<{ book: Book }>) => void;
 
-  'phone:join': (p: { code: string; clientId: string; nick: string }, ack: Ack<{ sessionId: string }>) => void;
+  'phone:join': (
+    p: { code: string; clientId: string; nick: string },
+    ack: Ack<{ sessionId: string }>,
+  ) => void;
   'phone:nick': (p: { nick: string }) => void;
   'phone:vote': (p: { slug: string }) => void;
   'phone:conductor:claim': () => void;

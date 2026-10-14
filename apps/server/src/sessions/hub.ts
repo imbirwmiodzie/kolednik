@@ -184,7 +184,16 @@ export class Hub {
         theme: p.data.theme,
         started_at: Date.now(),
       });
-      const s = new Session(id, code, groupId, displayName, hostToken, p.data.theme, [], () => this.library.slugs);
+      const s = new Session(
+        id,
+        code,
+        groupId,
+        displayName,
+        hostToken,
+        p.data.theme,
+        [],
+        () => this.library.slugs,
+      );
       this.register(s);
       this.attachHost(socket, s);
       ack?.({ ok: true, sessionId: id, hostToken });
@@ -234,8 +243,14 @@ export class Hub {
         }
       }),
     );
-    socket.on('phone:conductor:claim', asPhone(null, (s, id) => s.claimConductor(id)));
-    socket.on('phone:conductor:release', asPhone(null, (s, id) => s.releaseConductor(id)));
+    socket.on(
+      'phone:conductor:claim',
+      asPhone(null, (s, id) => s.claimConductor(id)),
+    );
+    socket.on(
+      'phone:conductor:release',
+      asPhone(null, (s, id) => s.releaseConductor(id)),
+    );
     socket.on(
       'phone:conductor:step',
       asPhone(schemas.step, (s, id, p) => {

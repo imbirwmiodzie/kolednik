@@ -11,7 +11,7 @@ import { SongLibrary } from './songs/library.js';
 export async function buildApp(config: Config, opts: { dbFile?: string; logger?: boolean } = {}) {
   const library = SongLibrary.load(config.contentDir);
   const db = new Db(opts.dbFile ?? path.join(config.dataDir, 'kolednik.sqlite'));
-  const app = Fastify({ logger: opts.logger ?? false, trustProxy: true });
+  const app = Fastify({ logger: opts.logger ?? false, trustProxy: true, disableRequestLogging: true });
 
   app.get('/healthz', async () => ({ ok: true, songs: library.slugs.length }));
   app.get('/api/songs', async () => library.meta());
@@ -38,7 +38,9 @@ export async function buildApp(config: Config, opts: { dbFile?: string; logger?:
       },
     });
     app.setNotFoundHandler((req, reply) =>
-      req.url.startsWith('/api/') ? reply.code(404).send({ error: 'Not found' }) : reply.sendFile('index.html'),
+      req.url.startsWith('/api/')
+        ? reply.code(404).send({ error: 'Not found' })
+        : reply.sendFile('index.html'),
     );
   }
 

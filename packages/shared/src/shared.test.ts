@@ -86,21 +86,36 @@ describe('scorePerformance', () => {
     }));
 
   it('cisza daje 0', () => {
-    const m = scorePerformance(frames(20, 5, () => -60), -60);
+    const m = scorePerformance(
+      frames(20, 5, () => -60),
+      -60,
+    );
     expect(m.score).toBe(0);
     expect(m.stars).toBe(0);
   });
 
   it('głośniejszy śpiew daje wyższy wynik', () => {
-    const quiet = scorePerformance(frames(20, 5, () => -48), -60);
-    const loud = scorePerformance(frames(20, 5, () => -32), -60);
+    const quiet = scorePerformance(
+      frames(20, 5, () => -48),
+      -60,
+    );
+    const loud = scorePerformance(
+      frames(20, 5, () => -32),
+      -60,
+    );
     expect(loud.score).toBeGreaterThan(quiet.score);
     expect(loud.coverage).toBe(1);
   });
 
   it('nie zależy od poziomu tła', () => {
-    const a = scorePerformance(frames(20, 5, () => -40), -60);
-    const b = scorePerformance(frames(20, 5, () => -20), -40);
+    const a = scorePerformance(
+      frames(20, 5, () => -40),
+      -60,
+    );
+    const b = scorePerformance(
+      frames(20, 5, () => -20),
+      -40,
+    );
     expect(a.score).toBe(b.score);
   });
 

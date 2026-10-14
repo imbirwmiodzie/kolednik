@@ -2,6 +2,16 @@
 
 Plan do [WYMAGANIA.md](WYMAGANIA.md) (wersja 0.4). Numery `F…`/`N…` odnoszą się do wymagań.
 
+> **Stan:** etapy **M0–M6 (MVP) zrobione** — testy jednostkowe, integracyjne i e2e przechodzą.
+> Do zrobienia przed świętami: wdrożenie na serwer i przegląd tekstów (patrz README). Dalej etap 2 (M7–M9).
+>
+> Odstępstwa od planu w implementacji:
+> - SQLite przez wbudowany `node:sqlite` zamiast `better-sqlite3` — brak natywnych zależności, prostszy obraz ARM.
+> - Pomiar dB przez `AnalyserNode` (co 50 ms) zamiast własnego AudioWorkletu — wystarcza do RMS.
+> - Animacje w czystym CSS/canvas, bez Framer Motion; style w jednym `styles.css` ze zmiennymi motywów.
+> - Serwer bundlowany esbuildem do jednego pliku — obraz bez `node_modules`.
+> - *Mizerna, cicha* zastąpiona przez *W żłobie leży* (patrz README → teksty do przejrzenia).
+
 ---
 
 ## 1. Stos technologiczny
