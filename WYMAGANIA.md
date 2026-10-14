@@ -2,7 +2,7 @@
 
 Aplikacja „karaoke do kolęd” na spotkania świąteczne. Uruchamiana na PC podłączonym do telewizora, uczestnicy biorą udział przez swoje smartfony.
 
-Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania). Implementacja jeszcze nie rozpoczęta.
+Status: **szkic wymagań** (wersja 0.3 — po dwóch rundach pytań). Implementacja jeszcze nie rozpoczęta.
 
 ---
 
@@ -20,6 +20,7 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 |---|---|---|
 | **Gospodarz** | PC + TV | uruchamia sesję, wybiera motyw, steruje odtwarzaniem, włącza podkład i ustawia tonację, uruchamia głosowanie lub losowanie |
 | **Uczestnik** | smartfon | dołącza do sesji, głosuje na następną kolędę, widzi tekst kolędy zsynchronizowany z TV |
+| **Dyrygent** | smartfon | uczestnik wskazany przez gospodarza; przełącza wersy z telefonu (gdy tekst nie jest przewijany automatycznie) |
 
 ## 3. Wymagania funkcjonalne
 
@@ -33,6 +34,7 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 
 ### 3.2 Wybór następnej kolędy: głosowanie i losowanie
 - **F6.** Domyślnym sposobem wyboru jest **głosowanie na wszystkie kolędy**, które **nie zostały jeszcze zaśpiewane** w tej sesji.
+- **F6a.** **Sesja = jeden wieczór.** Lista zaśpiewanych kolęd jest liczona w obrębie sesji; nowa sesja (nowy wieczór) zaczyna z pustą listą.
 - **F7.** Dostępny jest też tryb **„Losuj”** — animowane losowanie (np. kręcące się kafelki, koło fortuny, bombki) spośród kolęd jeszcze nie zaśpiewanych.
 - **F8.** Losowanie jest używane również automatycznie: przy remisie w głosowaniu (losowanie spośród remisujących) oraz gdy nikt nie zagłosował.
 - **F8a.** Gdy wszystkie kolędy zostały zaśpiewane, aplikacja to ogłasza i proponuje nową rundę (wyzerowanie listy zaśpiewanych).
@@ -49,7 +51,10 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 - **F15.** Tekst wyświetlany dużą czcionką, aktualny wers wyróżniony, kolejny wers widoczny pod spodem (podgląd).
 - **F16.** Domyślnie śpiewane są **absolutnie wszystkie zwrotki** kolędy.
 - **F17.** Aplikacja **nasłuchuje przez mikrofon** i na tej podstawie **przewija tekst** do aktualnie śpiewanego miejsca.
-- **F18.** Tryb awaryjny / ręczny: przewijanie wg zapisanego tempa (lub tempa podkładu) oraz ręcznie (strzałki / pilot / przycisk gospodarza).
+- **F18.** **Tryby przechodzenia do następnego wersu** (wybiera gospodarz, można zmienić w trakcie kolędy):
+  - **automatyczny** — wg śledzenia śpiewu, zapisanego tempa lub podkładu,
+  - **z telefonu** — wersy przełącza **dyrygent** (wskazany uczestnik) dużym przyciskiem „następny wers” na telefonie; gospodarz może przekazać rolę dyrygenta innej osobie,
+  - zawsze dostępne jest ręczne sterowanie z PC (strzałki / pilot).
 - **F19.** Możliwość zatrzymania, cofnięcia o wers, przejścia do następnej zwrotki, zakończenia kolędy.
 - **F20.** **Tekst na telefonach:** w trakcie kolędy telefon uczestnika pokazuje tekst zsynchronizowany z TV (wyróżniony bieżący wers, auto-przewijanie), z możliwością powiększenia czcionki.
 
@@ -86,10 +91,12 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 
 ### 3.9 Rekordy i historia
 - **F36.** Wyniki są **zapisywane na serwerze** i dostępne między sesjami — „bijemy rekordy”.
-- **F37.** Dla każdej kolędy przechowywany jest **rekord grupy** (najlepszy wynik + data); na koniec kolędy pokazywane jest porównanie z rekordem.
+- **F37.** Dla każdej kolędy przechowywany jest **rekord grupy** (najlepszy wynik + data); na koniec kolędy pokazywane jest porównanie z rekordem. Zmiana tonacji/tempa **nie** tworzy osobnego rekordu — liczy się do tego samego.
 - **F38.** Pobicie rekordu = specjalna animacja na TV i telefonach („NOWY REKORD!” — fajerwerki, dzwonki).
 - **F39.** Tabela rekordów / „Złota księga” — ranking kolęd wg najlepszego wyniku, historia sesji (data, zaśpiewane kolędy, wyniki).
-- **F40.** Wyniki przypisane do **grupy** (np. „Rodzina Kowalskich”), żeby różne grupy korzystające z aplikacji nie mieszały rekordów (sposób identyfikacji grupy — patrz pytania otwarte).
+- **F40.** **Bez logowania:** gospodarz przy starcie wpisuje imię / nazwę (np. „Rodzina Kowalskich”) — ta nazwa jest „kontem” grupy, pod którym zapisują się rekordy i historia. Wpisanie tej samej nazwy kolejnym razem wczytuje dotychczasowe rekordy. Nazwa porównywana bez względu na wielkość liter i spacje na końcach.
+- **F41.** Rekordy i historia są widoczne **tylko dla własnej grupy** (brak publicznego rankingu).
+- **F42.** Uczestnicy dołączający z telefonu nie zakładają konta — opcjonalnie podają ksywkę (np. do wyboru dyrygenta).
 
 ## 4. Wymagania niefunkcjonalne
 
@@ -97,13 +104,15 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 - **N2. Telefony:** strona uczestnika działa w mobilnym Safari i Chrome, bez instalacji; widok głosowania i widok tekstu czytelne w pionie.
 - **N3. Opóźnienia:** głos → TV < 1 s; synchronizacja tekstu TV ↔ telefony < 0,5 s; przewijanie płynne (bez skoków).
 - **N4. Prywatność:** dźwięk z mikrofonu analizowany lokalnie w przeglądarce, **nie jest nagrywany ani wysyłany** na serwer — na serwer trafiają tylko wyniki liczbowe.
-- **N5. Hosting w internecie:** aplikacja dostępna pod publicznym adresem (HTTPS — wymagany m.in. do dostępu do mikrofonu); serwer obsługuje wiele równoległych sesji różnych grup.
+- **N5. Hosting:** domena **505844.xyz**, serwer własny na **Oracle Cloud**. HTTPS wymagany (m.in. do dostępu do mikrofonu i połączeń WebSocket z telefonów); serwer obsługuje wiele równoległych sesji różnych grup.
 - **N6. Prostota startu:** od otwarcia strony do pierwszej kolędy — maks. kilka kliknięć.
 - **N7. Odporność na zerwanie połączenia:** telefon, który stracił połączenie, automatycznie wraca do sesji; chwilowy brak internetu nie przerywa śpiewania na TV.
 
 ## 5. Uwagi techniczne (wstępne, do decyzji)
 
-- **Architektura:** frontend (ekran TV + widok telefonu) + serwer w chmurze z **WebSocketami** do sesji, głosowania i synchronizacji tekstu (np. Node.js) + baza danych na rekordy i historię (np. PostgreSQL / SQLite).
+- **Architektura:** frontend (ekran TV + widok telefonu) + serwer z **WebSocketami** do sesji, głosowania i synchronizacji tekstu (np. Node.js) + baza danych na rekordy i historię (wystarczy SQLite).
+- **Wdrożenie na Oracle Cloud:** VM (np. darmowa instancja Ampere/ARM), aplikacja w kontenerze Docker, przed nią reverse proxy (np. **Caddy** — automatyczne certyfikaty Let's Encrypt i obsługa WebSocketów). W Oracle Cloud trzeba otworzyć porty 80/443 zarówno w *Security List* / NSG, jak i w firewallu systemu (iptables/firewalld). Rekord DNS A (lub subdomena) 505844.xyz → publiczny IP VM.
+- **Bezpieczeństwo „konta” bez logowania:** kto zna nazwę grupy, widzi i dopisuje jej rekordy — przy domowym użyciu akceptowalne; w razie potrzeby później można dodać opcjonalny PIN.
 - **Podkład i tonacja:** najprościej podkłady jako **MIDI** (lub inny zapis nutowy) odtwarzane syntezatorem w przeglądarce — zmiana tonacji i tempa jest wtedy bezstratna i trywialna, a melodie kolęd są w domenie publicznej. Alternatywa: nagrania audio + pitch-shifting (gorsza jakość przy dużych zmianach, trudniejsze licencyjnie).
 - **Śledzenie śpiewu:** rozpoznawanie mowy (Web Speech API) słabo radzi sobie ze śpiewem grupowym. Realistyczne podejście hybrydowe:
   1. tekst z przybliżonymi czasami wersów (jak pliki LRC) lub synchronizacja z podkładem,
@@ -125,24 +134,28 @@ Status: **szkic wymagań** (wersja 0.2 — po odpowiedziach na pierwsze pytania)
 | 6 | Zapis wyników? | Tak — rekordy między sesjami |
 | 7 | Wynik indywidualny czy grupowy? | Tylko grupowy |
 | 8 | Głos narratora? | Na razie syntetyczny |
+| 9 | Identyfikacja grupy? | Bez logowania — wpisane imię/nazwa = konto |
+| 10 | Rekordy publiczne? | Nie — tylko własna grupa |
+| 11 | Zmieniona tonacja/tempo a rekord? | Ten sam rekord |
+| 12 | Kto przełącza wersy? | Automatycznie (opcja) albo dyrygent z telefonu |
+| 13 | Zakres listy zaśpiewanych? | Jeden wieczór (sesja) |
+| 14 | Hosting? | 505844.xyz, własny serwer na Oracle Cloud |
 
 ## 7. Otwarte pytania
 
-1. **Identyfikacja grupy** (do rekordów): wystarczy nazwa grupy + PIN/hasło, czy potrzebne konto (np. logowanie przez Google)?
-2. Czy rekordy mają być **publiczne** (ranking wszystkich grup), czy tylko w obrębie własnej grupy?
-3. Czy przy zmianie tonacji/tempa wynik nadal liczy się do tego samego rekordu?
-4. Czy uczestnicy na telefonach mogą też sterować (np. „następny wers”), czy tylko gospodarz?
-5. Czy „lista zaśpiewanych” dotyczy jednego wieczoru, czy całego sezonu świątecznego?
-6. Preferencje co do hostingu / domeny (np. Vercel, Fly.io, własny VPS)?
+1. Pod jakim adresem ma działać aplikacja: bezpośrednio **505844.xyz** czy subdomena (np. **kolednik.505844.xyz**)?
+2. Czy na serwerze Oracle działa już coś innego (np. inny reverse proxy / Docker), z czym trzeba się zgrać?
+3. Dyrygent: wskazuje go gospodarz, czy rolę może przejąć każdy uczestnik jednym kliknięciem?
 
 ## 8. Proponowany zakres MVP
 
-1. Kafelki kolęd + ekran śpiewania z wyróżnionym wersem (przewijanie wg tempa + ręczne), wszystkie zwrotki.
+1. Kafelki kolęd + ekran śpiewania z wyróżnionym wersem, wszystkie zwrotki; przewijanie automatyczne wg tempa albo przez dyrygenta z telefonu.
 2. Głosowanie z telefonów przez QR na niezaśpiewane kolędy + wyniki na żywo; losowanie (tryb ręczny i przy remisie).
 3. Tekst kolędy zsynchronizowany na telefonach.
 4. 2–3 motywy kolorystyczne.
 5. Kolędometr (głośność w dB + wynik w formie gwiazdek/świeczek) dla całej grupy.
-6. Zapis rekordów grupy na serwerze + animacja „nowy rekord”.
-7. Narrator TTS czytający kolejny wers wg czasu.
+6. „Konto” grupy przez wpisanie nazwy, zapis rekordów na serwerze + animacja „nowy rekord”.
+7. Wdrożenie na Oracle Cloud pod 505844.xyz (Docker + Caddy, HTTPS).
+8. Narrator TTS czytający kolejny wers wg czasu.
 
 Etap 2: podkład muzyczny (MIDI) z regulacją tonacji i tempa, śledzenie śpiewu z mikrofonu, narrator reagujący na śpiew, Złota księga / historia sesji, własne kolędy.
