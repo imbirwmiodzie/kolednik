@@ -1,0 +1,128 @@
+{
+  "slug": "gdy-sie-chrystus-rodzi",
+  "title": "Gdy się Chrystus rodzi",
+  "art": {
+    "motif": "angel",
+    "hue": 265
+  },
+  "bpm": 140,
+  "key": "C",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Gdy się Chrystus rodzi"
+        },
+        {
+          "text": "I na świat przychodzi,"
+        },
+        {
+          "text": "Ciemna noc w jasności"
+        },
+        {
+          "text": "Promienistej brodzi."
+        },
+        {
+          "text": "Aniołowie się radują,"
+        },
+        {
+          "text": "Pod niebiosy wyśpiewują:"
+        },
+        {
+          "text": "Gloria, gloria, gloria"
+        },
+        {
+          "text": "In excelsis Deo!"
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Mówią do pasterzy,"
+        },
+        {
+          "text": "Którzy trzód swych strzegli,"
+        },
+        {
+          "text": "Aby do Betlejem"
+        },
+        {
+          "text": "Czym prędzej pobiegli,"
+        },
+        {
+          "text": "Bo się narodził Zbawiciel,"
+        },
+        {
+          "text": "Wszego świata Odkupiciel."
+        },
+        {
+          "text": "Gloria, gloria, gloria"
+        },
+        {
+          "text": "In excelsis Deo!"
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "„O niebieskie Duchy"
+        },
+        {
+          "text": "I posłowie nieba,"
+        },
+        {
+          "text": "Powiedzcież wyraźniej,"
+        },
+        {
+          "text": "Co nam czynić trzeba:"
+        },
+        {
+          "text": "Bo my nic nie pojmujemy,"
+        },
+        {
+          "text": "Ledwo od strachu żyjemy”."
+        },
+        {
+          "text": "Gloria, gloria, gloria"
+        },
+        {
+          "text": "In excelsis Deo!"
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "„Idźcież do Betlejem,"
+        },
+        {
+          "text": "Gdzie Dziecię zrodzone,"
+        },
+        {
+          "text": "W pieluszki powite,"
+        },
+        {
+          "text": "W żłobie położone;"
+        },
+        {
+          "text": "Oddajcie Mu pokłon boski,"
+        },
+        {
+          "text": "On osłodzi wasze troski”."
+        },
+        {
+          "text": "Gloria, gloria, gloria"
+        },
+        {
+          "text": "In excelsis Deo!"
+        }
+      ]
+    }
+  ]
+}

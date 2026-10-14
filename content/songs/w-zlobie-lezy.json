@@ -1,0 +1,90 @@
+{
+  "slug": "w-zlobie-lezy",
+  "title": "W żłobie leży",
+  "art": {
+    "motif": "candle",
+    "hue": 15
+  },
+  "bpm": 130,
+  "key": "F",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "W żłobie leży, któż pobieży"
+        },
+        {
+          "text": "Kolędować Małemu,"
+        },
+        {
+          "text": "Jezusowi, Chrystusowi,"
+        },
+        {
+          "text": "Dziś dla nas zrodzonemu?"
+        },
+        {
+          "text": "Pastuszkowie, przybywajcie,"
+        },
+        {
+          "text": "Jemu wdzięcznie przygrywajcie"
+        },
+        {
+          "text": "Jako Panu naszemu."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "My zaś sami z piosneczkami"
+        },
+        {
+          "text": "Za wami pospieszymy,"
+        },
+        {
+          "text": "A tak tego Maleńkiego"
+        },
+        {
+          "text": "Niech wszyscy zobaczymy:"
+        },
+        {
+          "text": "Jak ubogo narodzony,"
+        },
+        {
+          "text": "Płacze w stajni położony,"
+        },
+        {
+          "text": "Więc Go dziś ucieszymy."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Naprzód tedy niech tak wszędy"
+        },
+        {
+          "text": "Zabrzmi świat w wesołości,"
+        },
+        {
+          "text": "Że posłany nam jest dany"
+        },
+        {
+          "text": "Emanuel w niskości."
+        },
+        {
+          "text": "Jego tedy przywitajcie,"
+        },
+        {
+          "text": "Z aniołami zaśpiewajcie:"
+        },
+        {
+          "text": "Chwała na wysokości!"
+        }
+      ]
+    }
+  ]
+}

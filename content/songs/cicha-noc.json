@@ -1,0 +1,81 @@
+{
+  "slug": "cicha-noc",
+  "title": "Cicha noc",
+  "art": {
+    "motif": "moon",
+    "hue": 250
+  },
+  "bpm": 75,
+  "key": "B",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Cicha noc, święta noc,"
+        },
+        {
+          "text": "Pokój niesie ludziom wszem,"
+        },
+        {
+          "text": "A u żłóbka Matka Święta"
+        },
+        {
+          "text": "Czuwa sama uśmiechnięta"
+        },
+        {
+          "text": "Nad Dzieciątka snem,"
+        },
+        {
+          "text": "Nad Dzieciątka snem."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Cicha noc, święta noc,"
+        },
+        {
+          "text": "Pastuszkowie od swych trzód"
+        },
+        {
+          "text": "Biegną wielce zadziwieni"
+        },
+        {
+          "text": "Za anielskim głosem pieni,"
+        },
+        {
+          "text": "Gdzie się spełnił cud,"
+        },
+        {
+          "text": "Gdzie się spełnił cud."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Cicha noc, święta noc,"
+        },
+        {
+          "text": "Narodzony Boży Syn,"
+        },
+        {
+          "text": "Pan wielkiego majestatu"
+        },
+        {
+          "text": "Niesie dziś całemu światu"
+        },
+        {
+          "text": "Odkupienie win,"
+        },
+        {
+          "text": "Odkupienie win."
+        }
+      ]
+    }
+  ]
+}

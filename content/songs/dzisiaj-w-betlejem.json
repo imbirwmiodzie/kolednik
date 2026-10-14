@@ -1,0 +1,135 @@
+{
+  "slug": "dzisiaj-w-betlejem",
+  "title": "Dzisiaj w Betlejem",
+  "art": {
+    "motif": "bells",
+    "hue": 50
+  },
+  "bpm": 150,
+  "key": "F",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Dzisiaj w Betlejem, dzisiaj w Betlejem"
+        },
+        {
+          "text": "Wesoła nowina,"
+        },
+        {
+          "text": "Że Panna czysta, że Panna czysta"
+        },
+        {
+          "text": "Porodziła Syna."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Maryja Panna, Maryja Panna"
+        },
+        {
+          "text": "Dzieciątko piastuje,"
+        },
+        {
+          "text": "I Józef Święty, i Józef Święty"
+        },
+        {
+          "text": "Ono pielęgnuje."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Choć w stajeneczce, choć w stajeneczce"
+        },
+        {
+          "text": "Panna Syna rodzi,"
+        },
+        {
+          "text": "Przecież On wkrótce, przecież On wkrótce"
+        },
+        {
+          "text": "Ludzi oswobodzi."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "I Trzej Królowie, i Trzej Królowie"
+        },
+        {
+          "text": "Od wschodu przybyli,"
+        },
+        {
+          "text": "I dary Panu, i dary Panu"
+        },
+        {
+          "text": "Kosztowne złożyli."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Pójdźmy też i my, pójdźmy też i my"
+        },
+        {
+          "text": "Przywitać Jezusa,"
+        },
+        {
+          "text": "Króla nad królami, Króla nad królami,"
+        },
+        {
+          "text": "Uwielbić Chrystusa."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    }
+  ],
+  "choruses": {
+    "refren": {
+      "lines": [
+        {
+          "text": "Chrystus się rodzi, nas oswobodzi,"
+        },
+        {
+          "text": "Anieli grają, króle witają,"
+        },
+        {
+          "text": "Pasterze śpiewają, bydlęta klękają,"
+        },
+        {
+          "text": "Cuda, cuda ogłaszają."
+        }
+      ]
+    }
+  }
+}

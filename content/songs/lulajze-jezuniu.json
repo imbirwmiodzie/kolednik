@@ -1,0 +1,99 @@
+{
+  "slug": "lulajze-jezuniu",
+  "title": "Lulajże, Jezuniu",
+  "art": {
+    "motif": "moon",
+    "hue": 290
+  },
+  "bpm": 90,
+  "key": "G",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Lulajże, Jezuniu, moja perełko,"
+        },
+        {
+          "text": "Lulaj, ulubione me pieścidełko."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Zamknijże znużone płaczem powieczki,"
+        },
+        {
+          "text": "Utulże zemdlone łkaniem usteczki."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Lulajże, piękniuchny nasz aniołeczku,"
+        },
+        {
+          "text": "Lulajże, wdzięczniuchny świata kwiateczku."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Lulajże, różyczko najozdobniejsza,"
+        },
+        {
+          "text": "Lulajże, lilijko najprzyjemniejsza."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Lulajże, przyjemna oczom gwiazdeczko,"
+        },
+        {
+          "text": "Lulaj, najśliczniejsze świata słoneczko."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    }
+  ],
+  "choruses": {
+    "refren": {
+      "lines": [
+        {
+          "text": "Lulajże, Jezuniu, lulajże, lulaj!"
+        },
+        {
+          "text": "A Ty Go, Matulu, w płaczu utulaj."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "slug": "bog-sie-rodzi",
+  "title": "Bóg się rodzi",
+  "art": {
+    "motif": "crown",
+    "hue": 40
+  },
+  "bpm": 100,
+  "key": "C",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Bóg się rodzi, moc truchleje,"
+        },
+        {
+          "text": "Pan niebiosów obnażony;"
+        },
+        {
+          "text": "Ogień krzepnie, blask ciemnieje,"
+        },
+        {
+          "text": "Ma granice Nieskończony."
+        },
+        {
+          "text": "Wzgardzony, okryty chwałą,"
+        },
+        {
+          "text": "Śmiertelny Król nad wiekami!"
+        },
+        {
+          "text": "A Słowo Ciałem się stało"
+        },
+        {
+          "text": "I mieszkało między nami."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Cóż masz, niebo, nad ziemiany?"
+        },
+        {
+          "text": "Bóg porzucił szczęście swoje,"
+        },
+        {
+          "text": "Wszedł między lud ukochany,"
+        },
+        {
+          "text": "Dzieląc z nim trudy i znoje."
+        },
+        {
+          "text": "Niemało cierpiał, niemało,"
+        },
+        {
+          "text": "Żeśmy byli winni sami."
+        },
+        {
+          "text": "A Słowo Ciałem się stało"
+        },
+        {
+          "text": "I mieszkało między nami."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "W nędznej szopie urodzony,"
+        },
+        {
+          "text": "Żłób Mu za kolebkę dano!"
+        },
+        {
+          "text": "Cóż jest, czym był otoczony?"
+        },
+        {
+          "text": "Bydło, pasterze i siano."
+        },
+        {
+          "text": "Ubodzy, was to spotkało"
+        },
+        {
+          "text": "Witać Go przed bogaczami!"
+        },
+        {
+          "text": "A Słowo Ciałem się stało"
+        },
+        {
+          "text": "I mieszkało między nami."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Potem i króle widzieni"
+        },
+        {
+          "text": "Cisną się między prostotą,"
+        },
+        {
+          "text": "Niosąc dary Panu w cenie:"
+        },
+        {
+          "text": "Mirrę, kadzidło i złoto."
+        },
+        {
+          "text": "Bóstwo to razem zmieszało"
+        },
+        {
+          "text": "Z wieśniaczymi ofiarami."
+        },
+        {
+          "text": "A Słowo Ciałem się stało"
+        },
+        {
+          "text": "I mieszkało między nami."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Podnieś rękę, Boże Dziecię,"
+        },
+        {
+          "text": "Błogosław Ojczyznę miłą,"
+        },
+        {
+          "text": "W dobrych radach, w dobrym bycie"
+        },
+        {
+          "text": "Wspieraj jej siłę swą siłą."
+        },
+        {
+          "text": "Dom nasz i majętność całą,"
+        },
+        {
+          "text": "I wszystkie wioski z miastami!"
+        },
+        {
+          "text": "A Słowo Ciałem się stało"
+        },
+        {
+          "text": "I mieszkało między nami."
+        }
+      ]
+    }
+  ]
+}

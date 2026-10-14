@@ -1,0 +1,45 @@
+{
+  "slug": "jezus-malusienki",
+  "title": "Jezus malusieńki",
+  "art": {
+    "motif": "tree",
+    "hue": 140
+  },
+  "bpm": 110,
+  "key": "D",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Jezus malusieńki leży wśród stajenki,"
+        },
+        {
+          "text": "Płacze z zimna, nie dała Mu Matula sukienki."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Bo uboga była, rąbek z głowy zdjęła,"
+        },
+        {
+          "text": "W który Dziecię owinąwszy, siankiem Je okryła."
+        }
+      ]
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Nie ma kolebeczki ani poduszeczki,"
+        },
+        {
+          "text": "We żłobie Mu położyła siana pod główeczki."
+        }
+      ]
+    }
+  ]
+}

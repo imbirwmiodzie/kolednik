@@ -1,0 +1,114 @@
+{
+  "slug": "przybiezeli-do-betlejem",
+  "title": "Przybieżeli do Betlejem",
+  "art": {
+    "motif": "stable",
+    "hue": 30
+  },
+  "bpm": 150,
+  "key": "G",
+  "stanzas": [
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Przybieżeli do Betlejem pasterze,"
+        },
+        {
+          "text": "Grając skocznie Dzieciąteczku na lirze."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Oddawali swe ukłony w pokorze"
+        },
+        {
+          "text": "Tobie z serca ochotnego, o Boże!"
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Anioł Pański sam ogłosił te dziwy,"
+        },
+        {
+          "text": "Których oni nie słyszeli, jak żywi."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Dziwili się napowietrznej muzyce"
+        },
+        {
+          "text": "I myśleli, co to będzie za Dziecię?"
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "Poznali Go Mesjaszem być prawdziwym,"
+        },
+        {
+          "text": "Narodzonym dziś Panem miłościwym."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    },
+    {
+      "type": "verse",
+      "lines": [
+        {
+          "text": "I anieli gromadą pilnują,"
+        },
+        {
+          "text": "Panna czysta wraz z Józefem piastują."
+        }
+      ]
+    },
+    {
+      "type": "chorus",
+      "ref": "refren"
+    }
+  ],
+  "choruses": {
+    "refren": {
+      "lines": [
+        {
+          "text": "Chwała na wysokości, chwała na wysokości,"
+        },
+        {
+          "text": "A pokój na ziemi."
+        }
+      ]
+    }
+  }
+}
