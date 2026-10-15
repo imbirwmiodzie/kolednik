@@ -1,8 +1,12 @@
-import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Locator, type Page } from '@playwright/test';
 
 const PASSWORD = 'opłatek24';
 
 /** Nowy telefon (osobny kontekst przeglądarki) — przez link z kodu QR albo wpisany kod. */
+/** Akordy nad sylabami wersu (nazwy są w atrybucie, rysuje je CSS). */
+const chordsOf = (line: Locator) =>
+  line.locator('.chord-at').evaluateAll((els) => els.map((e) => e.getAttribute('data-chord')));
+
 async function phone(browser: Browser, how: { url?: string; code?: string }, nick: string): Promise<Page> {
   const ctx = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -126,7 +130,7 @@ test('wieczór: konto z hasłem, QR z kluczem, głosowanie, dyrygent, ocena i re
   await expect(ania.locator('.pl.is-cur')).toHaveText(/Pokój niesie ludziom wszem/);
   // Akordy na telefonie (włącza każdy sam).
   await ania.getByRole('button', { name: '🎸' }).click();
-  await expect(ania.locator('.pl.is-cur .chord-row')).toHaveText(/G7.*C/);
+  await expect.poll(() => chordsOf(ania.locator('.pl.is-cur'))).toEqual(['G7', 'C']);
   await ania.screenshot({ path: 'test-results/shots/4-phone-lyrics.png' });
 
   for (let i = 0; i < 17; i++) {
@@ -190,15 +194,27 @@ test('akordy z chwytami i podkład w trybie automatycznym', async ({ page: tv })
   await tv.getByLabel(/Pokazuj akordy nad tekstem/).check();
   await tv.getByText('Zaawansowane: podkład muzyczny').click();
   await tv.getByLabel(/Graj podkład/).check();
-  await tv.getByRole('checkbox', { name: /Gitara/ }).click(); // pianino + gitara razem
-  await expect(tv.getByRole('checkbox', { name: /Pianino/ })).toHaveAttribute('aria-checked', 'true');
-  await expect(tv.getByRole('checkbox', { name: /Gitara/ })).toHaveAttribute('aria-checked', 'true');
+  const instruments = tv.getByRole('group', { name: 'Instrumenty' });
+  await instruments.getByRole('checkbox', { name: /Gitara klasyczna/ }).click(); // fortepian + kontrabas + gitara razem
+  await expect(instruments.getByRole('checkbox', { name: /Fortepian/ })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(instruments.getByRole('checkbox', { name: /Kontrabas/ })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(instruments.getByRole('checkbox', { name: /Gitara klasyczna/ })).toHaveAttribute(
+    'aria-checked',
+    'true',
+  );
+  await expect(tv.getByRole('radio', { name: /Flet/ })).toHaveAttribute('aria-checked', 'true');
   await tv.screenshot({ path: 'test-results/shots/8-settings.png' });
   await tv.getByRole('button', { name: 'Zamknij' }).click();
 
   await tv.getByRole('button', { name: /Cicha noc/ }).click();
   await expect(tv.locator('.line-cur .line-text')).toHaveText('Cicha noc, święta noc,', { timeout: 6_000 });
-  await expect(tv.locator('.line-cur .chord-row')).toHaveText('C');
+  await expect.poll(() => chordsOf(tv.locator('.line-cur'))).toEqual(['C']);
   await expect(tv.locator('.chord-panel .chord-diagram').first()).toBeVisible();
   await expect(tv.getByText('🎹 Podkład')).toBeVisible();
   await expect(tv.locator('.line-cur .line-text')).toHaveText('Pokój niesie ludziom wszem,', {
@@ -208,7 +224,10 @@ test('akordy z chwytami i podkład w trybie automatycznym', async ({ page: tv })
   await tv.getByRole('button', { name: 'Wyżej o pół tonu' }).click();
   await tv.getByRole('button', { name: 'Wyżej o pół tonu' }).click();
   await expect(tv.locator('.key-ctl strong')).toHaveText('D');
-  await expect(tv.locator('.line-cur .chord-row')).toHaveText(/A7.*D/);
+  await expect.poll(() => chordsOf(tv.locator('.line-cur'))).toEqual(['A7', 'D']);
+  // akord nad sylabą, na którą wypada zmiana („lu-dziom”)
+  await expect(tv.locator('.line-cur .syl').nth(4).locator('.chord-at')).toHaveAttribute('data-chord', 'D');
+  await expect(tv.locator('.line-cur .syl').nth(4)).toHaveText('lu');
   await tv.screenshot({ path: 'test-results/shots/9-chords.png' });
   await tv.keyboard.press('ArrowDown');
   await expect(tv.locator('.sing-block')).toHaveText(/Zwrotka 2 z 3/);

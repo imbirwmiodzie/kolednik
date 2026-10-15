@@ -1,4 +1,10 @@
-import { GUITAR_SHAPES, polishChordName, transposeChord } from '@kolednik/shared';
+import {
+  GUITAR_SHAPES,
+  polishChordName,
+  transposeChord,
+  type FlatLine,
+  type LineMusic,
+} from '@kolednik/shared';
 
 /** Akordy wersu po transpozycji. */
 export function shiftChords(chords: string[], keyShift: number, songKey: string | undefined) {
@@ -80,5 +86,75 @@ export function ChordDiagram({ chord }: { chord: string }) {
         )}
       </svg>
     </figure>
+  );
+}
+
+/** Początek każdej sylaby w ćwierćnutach od początku wersu. */
+export function syllableStarts(music: LineMusic): number[] {
+  const starts: number[] = new Array(music.syl.length).fill(-1);
+  let t = 0;
+  for (const [midi, d, s] of music.notes) {
+    if (midi > 0 && starts[s] === -1) starts[s] = t;
+    t += d;
+  }
+  for (let i = 0; i < starts.length; i++) if (starts[i] === -1) starts[i] = i > 0 ? starts[i - 1]! : 0;
+  return starts;
+}
+
+/**
+ * Wers z nut: sylaby z akordami dokładnie nad tą sylabą, na którą wypada zmiana akordu,
+ * i (opcjonalnie) podświetlanie sylab w rytm melodii — jak w karaoke.
+ */
+export function SylLine({
+  line,
+  keyShift,
+  songKey,
+  showChords,
+  karaoke,
+}: {
+  line: FlatLine;
+  keyShift: number;
+  songKey: string | undefined;
+  showChords: boolean;
+  /** czas wersu: ile ms minęło, długość ćwierćnuty, pauza */
+  karaoke?: { elapsedMs: number; quarterMs: number; paused: boolean };
+}) {
+  const m = line.music;
+  if (!m) {
+    return (
+      <>
+        {showChords && <ChordRow chords={shiftChords(line.chords, keyShift, songKey)} />}
+        <span className="line-text">{line.text}</span>
+      </>
+    );
+  }
+  const starts = karaoke ? syllableStarts(m) : null;
+  return (
+    <span className={`line-text syl-line ${showChords ? 'has-chords' : ''}`}>
+      {m.syl.map((syl, i) => {
+        const chords = showChords
+          ? m.chords.filter((c) => c[0] === i).map((c) => transposeChord(c[2], keyShift, songKey ?? 'C'))
+          : [];
+        const style = starts
+          ? {
+              animationDelay: `${starts[i]! * karaoke!.quarterMs - karaoke!.elapsedMs}ms`,
+              animationPlayState: karaoke!.paused ? 'paused' : 'running',
+            }
+          : undefined;
+        return (
+          <span key={i} className={`syl ${starts ? 'karaoke' : ''}`} style={style}>
+            {chords.length > 0 && (
+              // nazwa akordu z CSS (attr), żeby nie mieszała się z tekstem wersu (czytniki ekranu, kopiowanie)
+              <span
+                className="chord-at"
+                data-chord={chords.map(polishChordName).join(' ')}
+                aria-hidden="true"
+              />
+            )}
+            {syl}
+          </span>
+        );
+      })}
+    </span>
   );
 }

@@ -1,5 +1,5 @@
 import type { ThemeId } from '@kolednik/shared';
-import type { InstrumentId } from './audio/accompaniment';
+import type { InstrumentId, MelodyId } from './audio/accompaniment';
 import { createStore } from './storage';
 
 /** Ustawienia gospodarza (TV), pamiętane między uruchomieniami. */
@@ -19,9 +19,11 @@ export const hostSettings = createStore('kolednik:settings', {
   chordDiagrams: true,
   // Zaawansowane: podkład muzyczny.
   accompaniment: false,
-  /** Instrumenty grające razem (można łączyć). */
-  instruments: ['piano'] as InstrumentId[],
-  accompanimentVolume: 0.6,
+  /** Instrumenty akompaniamentu grające razem (można łączyć). */
+  instruments: ['piano', 'bass'] as InstrumentId[],
+  /** Instrument prowadzący melodię (albo bez melodii). */
+  melody: 'flute' as MelodyId,
+  accompanimentVolume: 0.7,
   /** Zmiana tonacji (półtony) zapamiętana dla każdej kolędy osobno (F24). */
   keyBySong: {} as Record<string, number>,
 });

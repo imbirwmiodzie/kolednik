@@ -10,7 +10,7 @@ import { SPIN_MS } from '../tv/Reveal';
 import { ScoreBlock } from '../tv/Summary';
 import { useCountdown } from '../tv/Voting';
 import { blockLabel } from '../tv/Sing';
-import { ChordRow, shiftChords } from '../ui/Chords';
+import { SylLine } from '../ui/Chords';
 
 // `?gosc=2` w adresie = osobny gość w tej karcie — do testów kilku „telefonów” na jednym komputerze.
 const guest = new URLSearchParams(location.search).get('gosc');
@@ -367,10 +367,7 @@ function PhoneLyrics({ state }: { state: PublicState }) {
                 ref={isCur ? curRef : undefined}
                 className={`pl ${isCur ? 'is-cur' : ''} ${pos && l.index < pos.index ? 'is-past' : ''} ${l.part === 'chorus' ? 'is-chorus' : ''}`}
               >
-                {showChords && l.chords.length > 0 && (
-                  <ChordRow chords={shiftChords(l.chords, keyShift, song.key)} className="phone" />
-                )}
-                {l.text}
+                <SylLine line={l} keyShift={keyShift} songKey={song.key} showChords={showChords} />
                 {isCur && pos && (
                   <span
                     key={pos.startedAt}

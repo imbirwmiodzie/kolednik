@@ -107,6 +107,8 @@ Status: **szkic wymagań** (wersja 0.5 — samouczek, akordy, podkład, hasła, 
 - **F46. Konto grupy z hasłem** — nowa grupa podaje nazwę i hasło; istniejąca loguje się tym hasłem (zastępuje F40).
 - **F47. Link w kodzie QR zabezpieczony** losowym kluczem wieczoru danej rodziny; możliwość wygenerowania nowego.
 - **F48. Statystyki i dziennik zdarzeń** na serwerze, na osobnej stronie z loginem i hasłem.
+- **F49. Nuty z prawdziwych partytur** — melodia i rytm wersów z zapisu nutowego; akordy zmieniają się nad właściwą
+  sylabą; podkład gra melodię i akompaniament nagranymi instrumentami, które można łączyć.
 
 ## 4. Wymagania niefunkcjonalne
 

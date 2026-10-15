@@ -11,18 +11,21 @@
     "build": "pnpm --filter @kolednik/web build && pnpm --filter @kolednik/server build",
     "start": "node --disable-warning=ExperimentalWarning apps/server/dist/index.cjs",
     "test": "vitest run",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -r typecheck && tsc -p tools",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "local": "./kolednik-mac.command"
+    "local": "./kolednik-mac.command",
+    "import:music": "tsx tools/import/import.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@playwright/test": "~1.56.1",
+    "@types/node": "^22.20.5",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.2",
     "vitest": "^3.2.7"

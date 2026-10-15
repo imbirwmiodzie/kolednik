@@ -28,12 +28,24 @@ Sterowanie na TV: `←/→` wers, `↑/↓` zwrotka, `spacja` pauza, `Esc` konie
 
 ### Akordy i podkład
 
-- **Akordy na gitarę** (Ustawienia → Akordy): nazwy akordów nad tekstem i diagramy chwytów obok. Na telefonie
-  każdy włącza je sam przyciskiem 🎸.
-- **Podkład** (Ustawienia → Zaawansowane): generowany na żywo w przeglądarce z akordów kolędy — pianino, gitara,
-  organy, smyczki, pozytywka albo dzwonki. Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ (±6 półtonów);
-  zapamiętuje się dla każdej kolędy, a akordy na TV i telefonach przesuwają się razem z nią.
+- **Nuty z prawdziwych partytur.** 11 kolęd ma melodię z zapisu nutowego z Wikipedii (`<score>` w LilyPond,
+  licencja CC BY-SA). Każda sylaba tekstu ma swoje nuty, więc wers trwa tyle, ile w nutach, a akordy zmieniają
+  się dokładnie nad tą sylabą, na którą wypada zmiana. Na TV aktualny wers podświetla się sylaba po sylabie (karaoke).
+- **Akordy na gitarę** (Ustawienia → Akordy): nazwy nad sylabami i diagramy chwytów obok. Na telefonie każdy włącza
+  je sam przyciskiem 🎸. Akordy dobiera program do melodii (takt po takcie, z kadencjami D → T), a kolęda jest
+  przeniesiona do tonacji z łatwymi chwytami. To harmonizacja automatyczna — prosta, ale zgodna z melodią.
+- **Podkład** (Ustawienia → Zaawansowane): nagrane instrumenty (próbki *Musyng Kite*, CC BY-SA 3.0) — fortepian,
+  gitary, organy, smyczki, chór, flet, harfa, czelesta, pozytywka, dzwony, dzwonki i kontrabas. Można łączyć kilka
+  naraz, wybrać instrument prowadzący melodię albo gotowy zestaw („Przy kominku”, „Kolędnicy”, „Kościół”…).
+  Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ (±6 półtonów); zapamiętuje się dla każdej kolędy.
 - Podkład z głośników słychać w mikrofonie, więc kolędometr może wtedy zawyżać wynik.
+- *Pójdźmy wszyscy do stajenki* nie ma jeszcze nut (brak partytury w źródłach) — śpiewa się ją bez akordów i podkładu.
+
+#### Import nut (dla opiekunów)
+
+`pnpm import:music <katalog z artykułami .wiki>` — dla kolęd z mapy `SOURCES` w `tools/import/import.ts` czyta
+partyturę, dzieli tekst z `content/songs/<slug>.json` na sylaby, dopasowuje je do nut (z powtórzeniami i melizmatami),
+harmonizuje i zapisuje pole `music` w pliku kolędy. Plik kolędy musi mieć tekst bez nut (pierwszy import).
 
 ### Bezpieczeństwo
 
@@ -156,7 +168,7 @@ Plik `content/songs/<slug>.json` (slug = nazwa pliku):
 }
 ```
 
-- `bpm` ≈ liczba sylab na minutę. Czas wersu liczy się sam z liczby sylab; `beats` nadpisuje go dla jednego wersu.
+- `bpm` ≈ liczba sylab na minutę (w kolędach z nutami: ćwierćnuty na minutę). Czas wersu liczy się sam z liczby sylab albo z nut; `beats` nadpisuje go dla jednego wersu.
 - `motif`: `star`, `stable`, `angel`, `candle`, `tree`, `moon`, `crown`, `bells`; `hue` 0–360 to kolor nieba.
 - Własny obrazek: wrzuć `content/images/moja-koleda.webp` i dodaj `"image": "moja-koleda.webp"`.
 - `pnpm test` sprawdza wszystkie pliki — zły plik = czerwony test.
@@ -167,7 +179,8 @@ Teksty zostały spisane z pamięci (bez dostępu do źródeł), z pominięciem z
 Przed świętami warto je porównać ze śpiewnikiem:
 
 - **Wszystkie** — interpunkcja i drobne warianty (różne śpiewniki różnią się słowami).
-- **Akordy** — też z pamięci, uproszczone (głównie T–S–D w wygodnych tonacjach); warto sprawdzić z gitarą.
+- **Akordy** — dobrane automatycznie do melodii z nut; warto zagrać na gitarze i poprawić, gdzie brzmi płasko.
+- `gdy-sliczna-panna`, `aniol-pasterzom-mowil` — teksty z *Kantyczek* (1904, 1943) z Wikiźródeł, pisownia uwspółcześniona.
 - `w-zlobie-lezy` — 3. zwrotka, zwłaszcza wers „Naprzód tedy niech tak wszędy”.
 - `przybiezeli-do-betlejem` — kolejność zwrotek; brakuje m.in. zwrotki o wole i ośle.
 - `gdy-sie-chrystus-rodzi` — brakuje 5. zwrotki („A gdy pastuszkowie wszystko zrozumieli…”).

@@ -19,7 +19,7 @@ import { getSocket, toServerTime } from '../net/socket';
 import { estimateSpeechMs, narrator, promptText } from '../narrator/narrator';
 import { usePlayer, type PlayerPos } from '../lyrics/usePlayer';
 import { hostSettings, setSongKeyShift, songKeyShift } from '../settings';
-import { ChordDiagram, ChordRow, shiftChords } from '../ui/Chords';
+import { ChordDiagram, shiftChords, SylLine } from '../ui/Chords';
 
 const INTRO_SEC = 3;
 
@@ -54,7 +54,6 @@ function SingSong({
   const [intro, setIntro] = useState(INTRO_SEC);
   const running = intro === 0;
   const [keyShift, setKeyShift] = useState(() => songKeyShift(song.slug));
-  const beatMs = 60_000 / (song.bpm * settings.tempo);
   const frames = useRef<Frame[]>([]);
   const finished = useRef(false);
 
@@ -107,14 +106,23 @@ function SingSong({
     return () => clearTimeout(t);
   }, [intro, lines]);
 
-  // Podkład (F21): akordy bieżącego wersu grane przez syntezator; pauza i koniec wyciszają.
+  // Podkład (F21): melodia i akordy wersu grane nagranymi instrumentami; pauza i koniec wyciszają.
+  const meter = (song.music?.meter ?? [4, 4]) as [number, number];
+  const quarterMs = 60_000 / (song.bpm * settings.tempo);
+  useEffect(() => {
+    if (settings.accompaniment)
+      void accompaniment.preload([
+        ...settings.instruments,
+        ...(settings.melody === 'none' ? [] : [settings.melody]),
+      ]);
+  }, [settings.accompaniment, settings.instruments, settings.melody]);
   useEffect(() => {
     if (!settings.accompaniment) return accompaniment.stop();
     accompaniment.setVolume(settings.accompanimentVolume);
     if (!running) {
-      const first = lines[0]?.chords[0];
+      const first = lines[0]?.music?.chords[0]?.[2] ?? lines[0]?.chords[0];
       if (first && intro === INTRO_SEC - 1) {
-        accompaniment.countIn(first, keyShift, beatMs, settings.instruments);
+        accompaniment.countIn(first, keyShift, quarterMs, meter, settings.instruments);
       }
       return;
     }
@@ -123,14 +131,17 @@ function SingSong({
     if (!line) return;
     accompaniment.playLine({
       chords: line.chords,
+      music: line.music,
       durationMs: durations[pos.index] ?? 0,
-      beatMs,
+      quarterMs,
+      meter,
       instruments: settings.instruments,
+      melody: settings.melody,
       keyShift,
       offsetMs: Date.now() - pos.startedAt,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, intro, pos, settings.accompaniment, settings.instruments, keyShift]);
+  }, [running, intro, pos, settings.accompaniment, settings.instruments, settings.melody, keyShift]);
   useEffect(() => accompaniment.setVolume(settings.accompanimentVolume), [settings.accompanimentVolume]);
   useEffect(() => () => accompaniment.stop(), []);
 
@@ -286,7 +297,10 @@ function SingSong({
           pos={pos}
           durations={durations}
           mode={mode}
-          chords={settings.chords ? (l) => shiftChords(l.chords, keyShift, song.key) : null}
+          showChords={settings.chords}
+          keyShift={keyShift}
+          songKey={song.key}
+          quarterMs={quarterMs}
         />
       )}
       {settings.chords && settings.chordDiagrams && (
@@ -362,13 +376,19 @@ function Lines({
   pos,
   durations,
   mode,
-  chords,
+  showChords,
+  keyShift,
+  songKey,
+  quarterMs,
 }: {
   lines: FlatLine[];
   pos: PlayerPos;
   durations: number[];
   mode: AdvanceMode;
-  chords: ((l: FlatLine) => string[]) | null;
+  showChords: boolean;
+  keyShift: number;
+  songKey: string | undefined;
+  quarterMs: number;
 }) {
   const cur = lines[pos.index];
   const prev = lines[pos.index - 1];
@@ -378,13 +398,20 @@ function Lines({
   const newBlock = next && cur && next.block !== cur.block;
   return (
     <div className="lines">
-      <p className="line line-prev">{prev?.text ?? ' '}</p>
+      <p className="line line-prev">{prev?.text ?? '\u00a0'}</p>
       <p
-        className={`line line-cur ${cur?.part === 'chorus' ? 'is-chorus' : ''}`}
+        className={`line line-cur ${cur?.part === 'chorus' ? 'is-chorus' : ''} ${showChords ? 'with-chords' : ''}`}
         key={`${pos.index}-${pos.startedAt}`}
       >
-        {chords && cur && <ChordRow chords={chords(cur)} />}
-        <span className="line-text">{cur?.text}</span>
+        {cur && (
+          <SylLine
+            line={cur}
+            keyShift={keyShift}
+            songKey={songKey}
+            showChords={showChords}
+            karaoke={{ elapsedMs: elapsed, quarterMs, paused: pos.paused }}
+          />
+        )}
         <span
           className={`line-progress ${mode === 'conductor' ? 'is-conductor' : ''}`}
           style={{
@@ -397,11 +424,14 @@ function Lines({
       {newBlock && (
         <p className="line-divider">{next.part === 'chorus' ? 'refren' : `zwrotka ${next.verse + 1}`}</p>
       )}
-      <p className="line line-next">
-        {chords && next && <ChordRow chords={chords(next)} className="small" />}
-        {next?.text ?? ' '}
+      <p className={`line line-next ${showChords ? 'with-chords' : ''}`}>
+        {next ? (
+          <SylLine line={next} keyShift={keyShift} songKey={songKey} showChords={showChords} />
+        ) : (
+          '\u00a0'
+        )}
       </p>
-      <p className="line line-after">{after?.text ?? ' '}</p>
+      <p className="line line-after">{after?.text ?? '\u00a0'}</p>
       {pos.paused && <div className="paused-badge">⏸ Pauza</div>}
     </div>
   );

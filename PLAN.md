@@ -4,7 +4,9 @@ Plan do [WYMAGANIA.md](WYMAGANIA.md) (wersja 0.4). Numery `F…`/`N…` odnoszą
 
 > **Stan:** etapy **M0–M6 (MVP) zrobione**, do tego wersja 0.5: samouczek, akordy z chwytami, podkład
 > syntezowany z akordów (6 instrumentów, zmiana tonacji), konta z hasłem, klucz w linku QR, panel statystyk.
-> M7 jest zrobiony inaczej niż w planie — podkład z akordów zamiast plików MIDI (bez melodii).
+> M7 jest zrobiony inaczej niż w planie: zamiast plików MIDI — nuty z partytur Wikipedii (LilyPond) zapisane
+> w plikach kolęd (sylaba → nuty, akordy nad sylabami), odtwarzane nagranymi próbkami instrumentów (Musyng Kite)
+> z melodią i łączeniem instrumentów. Narzędzie importu: `tools/import` (`pnpm import:music`).
 > Testy jednostkowe, integracyjne i e2e przechodzą.
 > Do zrobienia przed świętami: wdrożenie na serwer i przegląd tekstów (patrz README). Dalej etap 2 (M7–M9).
 >

@@ -4,8 +4,24 @@ import { isValidChord, splitChords } from './chords.js';
 export const MOTIFS = ['star', 'stable', 'angel', 'candle', 'tree', 'moon', 'crown', 'bells'] as const;
 export type Motif = (typeof MOTIFS)[number];
 
+/**
+ * Nuty wersu (z partytury): sylaby, nuty i akordy we właściwych miejscach.
+ * - `syl`: sylaby, które sklejone dają tekst wersu,
+ * - `notes`: [wysokość MIDI (0 = pauza), długość w ćwierćnutach, indeks sylaby],
+ * - `chords`: [indeks sylaby, moment od początku wersu w ćwierćnutach, akord].
+ */
+const lineMusicSchema = z.object({
+  syl: z.array(z.string()).min(1),
+  notes: z
+    .array(z.tuple([z.number().int().min(0).max(127), z.number().positive(), z.number().int().min(0)]))
+    .min(1),
+  chords: z.array(z.tuple([z.number().int().min(0), z.number().min(0), z.string().refine(isValidChord)])),
+});
+export type LineMusic = z.infer<typeof lineMusicSchema>;
+
 const lineSchema = z.object({
   text: z.string().min(1),
+  music: lineMusicSchema.optional(),
   /** Czas wersu w uderzeniach; gdy brak — liczony z liczby sylab. */
   beats: z.number().positive().optional(),
   /** Akordy wersu oddzielone spacjami, rozłożone równo na czas wersu, np. "C G7 C". */
@@ -26,9 +42,11 @@ export const songSchema = z
     title: z.string().min(1),
     art: z.object({ motif: z.enum(MOTIFS), hue: z.number().min(0).max(360) }),
     image: z.string().optional(),
-    /** Tempo: liczba sylab (uderzeń) na minutę. */
+    /** Tempo: uderzenia na minutę (przy nutach — ćwierćnuty na minutę). */
     bpm: z.number().min(30).max(300),
     key: z.string().optional(),
+    /** Skąd pochodzą melodia i tekst (gdy kolęda ma nuty). */
+    music: z.object({ meter: z.tuple([z.number(), z.number()]), source: z.string() }).optional(),
     stanzas: z.array(stanzaSchema).min(1),
     choruses: z.record(z.string(), z.object({ lines: z.array(lineSchema).min(1) })).default({}),
   })
@@ -46,6 +64,7 @@ export type SongMeta = Pick<Song, 'slug' | 'title' | 'art' | 'image'> & {
   stanzaCount: number;
   lineCount: number;
   hasChords: boolean;
+  hasMusic: boolean;
 };
 
 export type FlatLine = {
@@ -58,6 +77,7 @@ export type FlatLine = {
   text: string;
   beats: number;
   chords: string[];
+  music?: LineMusic;
 };
 
 const VOWELS = 'aąeęioóuy';
@@ -93,8 +113,11 @@ export function flattenSong(song: Song): FlatLine[] {
         verse: Math.max(0, verse),
         part: isChorus ? 'chorus' : 'verse',
         text: line.text,
-        beats: line.beats ?? countSyllables(line.text) + LINE_GAP_BEATS,
-        chords: splitChords(line.chords),
+        beats: line.music
+          ? line.music.notes.reduce((sum, n) => sum + n[1], 0)
+          : (line.beats ?? countSyllables(line.text) + LINE_GAP_BEATS),
+        chords: line.music ? line.music.chords.map((c) => c[2]) : splitChords(line.chords),
+        music: line.music,
       });
     }
   });
@@ -118,5 +141,6 @@ export function songMeta(song: Song): SongMeta {
     stanzaCount: verseCount(song),
     lineCount: flattenSong(song).length,
     hasChords: flattenSong(song).some((l) => l.chords.length > 0),
+    hasMusic: Boolean(song.music),
   };
 }

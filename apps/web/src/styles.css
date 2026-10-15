@@ -1757,3 +1757,50 @@ body.admin {
   flex-wrap: wrap;
   align-items: center;
 }
+
+/* ───────────── Sylaby: akordy nad sylabą i karaoke ───────────── */
+.syl {
+  position: relative;
+}
+.syl-line.has-chords .syl {
+  display: inline-block;
+  white-space: pre;
+}
+.line.with-chords,
+.pl:has(.has-chords) {
+  padding-top: 0.55em;
+}
+.chord-at {
+  position: absolute;
+  left: 0;
+  bottom: 88%;
+  font-family: 'Nunito', sans-serif;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.42em;
+  line-height: 1;
+  color: var(--accent);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.chord-at::before {
+  content: attr(data-chord);
+}
+.line-next .chord-at {
+  font-size: 0.5em;
+}
+.pl .chord-at {
+  font-size: 0.68em;
+  bottom: 92%;
+}
+/* karaoke: sylaba „zapala się”, gdy przychodzi jej nuta */
+.syl.karaoke {
+  color: var(--text);
+  animation: syl-sung 0.12s linear forwards;
+}
+@keyframes syl-sung {
+  to {
+    color: var(--highlight);
+    text-shadow: 0 0 0.35em color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+}

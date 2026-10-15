@@ -38,6 +38,17 @@ export async function buildApp(
   if (existsSync(images)) {
     await app.register(fastifyStatic, { root: images, prefix: '/content/images/', decorateReply: false });
   }
+  // Nagrane próbki instrumentów (podkład) — niezmienne, więc długi cache.
+  const samples = path.join(config.contentDir, 'samples');
+  if (existsSync(samples)) {
+    await app.register(fastifyStatic, {
+      root: samples,
+      prefix: '/content/samples/',
+      decorateReply: false,
+      maxAge: '30d',
+      immutable: true,
+    });
+  }
 
   if (config.webDist && existsSync(config.webDist)) {
     await app.register(fastifyStatic, {

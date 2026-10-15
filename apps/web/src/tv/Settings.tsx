@@ -1,5 +1,14 @@
 import type { ThemeId } from '@kolednik/shared';
-import { accompaniment, ENSEMBLES, INSTRUMENTS, type InstrumentId } from '../audio/accompaniment';
+import { useSyncExternalStore } from 'react';
+import { flattenSong } from '@kolednik/shared';
+import {
+  accompaniment,
+  ENSEMBLES,
+  INSTRUMENTS,
+  type InstrumentId,
+  type MelodyId,
+} from '../audio/accompaniment';
+import { fetchSong } from '../net/api';
 import { mic, useMic } from '../audio/mic';
 import { getSocket } from '../net/socket';
 import { narrator } from '../narrator/narrator';
@@ -42,6 +51,7 @@ export function SettingsModal({
 }) {
   const s = hostSettings.use();
   const m = useMic();
+  const loading = useSyncExternalStore(accompaniment.subscribe, accompaniment.getLoading);
   return (
     <Modal title="Ustawienia" onClose={onClose}>
       <section className="settings-section">
@@ -206,9 +216,43 @@ export function SettingsModal({
             checked={s.accompaniment}
             onChange={(e) => hostSettings.set({ accompaniment: e.target.checked })}
           />
-          Graj podkład do kolęd (generowany z akordów)
+          Graj podkład: melodia i akompaniament z nut kolędy, nagranymi instrumentami
         </label>
-        <p className="hint">Instrumenty (można łączyć kilka):</p>
+        <p className="hint">Gotowe zestawy:</p>
+        <div className="instrument-picker" aria-label="Zestawy">
+          {ENSEMBLES.map((e) => (
+            <button
+              key={e.name}
+              type="button"
+              className={`chip ${e.instruments.join() === s.instruments.join() && e.melody === s.melody ? 'is-active' : ''}`}
+              onClick={() => {
+                hostSettings.set({ instruments: e.instruments, melody: e.melody });
+                void preview(e.instruments, e.melody, s.accompanimentVolume);
+              }}
+            >
+              {e.instruments.map((i) => icon(i)).join('')} {e.name}
+            </button>
+          ))}
+        </div>
+        <p className="hint">Melodię prowadzi:</p>
+        <div className="instrument-picker" role="radiogroup" aria-label="Melodia">
+          {[{ id: 'none' as const, name: 'bez melodii', icon: '🔇' }, ...INSTRUMENTS].map((inst) => (
+            <button
+              key={inst.id}
+              type="button"
+              role="radio"
+              aria-checked={s.melody === inst.id}
+              className={`chip ${s.melody === inst.id ? 'is-active' : ''}`}
+              onClick={() => {
+                hostSettings.set({ melody: inst.id });
+                if (inst.id !== 'none') void preview([], inst.id, s.accompanimentVolume);
+              }}
+            >
+              {inst.icon} {inst.name}
+            </button>
+          ))}
+        </div>
+        <p className="hint">Akompaniament (można łączyć kilka):</p>
         <div className="instrument-picker" role="group" aria-label="Instrumenty">
           {INSTRUMENTS.map((inst) => {
             const on = s.instruments.includes(inst.id);
@@ -222,37 +266,23 @@ export function SettingsModal({
                 onClick={() => {
                   const next = on ? s.instruments.filter((i) => i !== inst.id) : [...s.instruments, inst.id];
                   hostSettings.set({ instruments: next });
-                  if (!on) preview([inst.id], s.accompanimentVolume);
+                  if (!on) void preview([inst.id], 'none', s.accompanimentVolume);
                 }}
               >
-                {INSTRUMENT_ICON[inst.id]} {inst.name}
+                {inst.icon} {inst.name}
               </button>
             );
           })}
         </div>
-        <p className="hint">Gotowe zestawy:</p>
-        <div className="instrument-picker" aria-label="Zestawy">
-          {ENSEMBLES.map((e) => (
-            <button
-              key={e.name}
-              type="button"
-              className={`chip ${e.instruments.join() === s.instruments.join() ? 'is-active' : ''}`}
-              onClick={() => {
-                hostSettings.set({ instruments: e.instruments });
-                preview(e.instruments, s.accompanimentVolume);
-              }}
-            >
-              {e.instruments.map((i) => INSTRUMENT_ICON[i]).join('')} {e.name}
-            </button>
-          ))}
+        <div className="row">
           <button
             type="button"
-            className="chip"
-            disabled={!s.instruments.length}
-            onClick={() => preview(s.instruments, s.accompanimentVolume)}
+            className="btn btn-small"
+            onClick={() => void preview(s.instruments, s.melody, s.accompanimentVolume)}
           >
-            ▶ Posłuchaj
+            ▶ Posłuchaj (Cicha noc)
           </button>
+          {loading > 0 && <span className="hint">Ładowanie instrumentów… ({loading})</span>}
         </div>
         <Range
           label="Głośność podkładu"
@@ -267,9 +297,10 @@ export function SettingsModal({
           }}
         />
         <p className="hint">
-          Włączenie instrumentu albo zestawu odtwarza próbkę. Tonację zmieniacie w trakcie kolędy przyciskami
-          ♭/♯ — zapamięta się dla każdej kolędy osobno. Uwaga: podkład z głośników słychać też w mikrofonie,
-          więc kolędometr może zawyżać wynik — dla uczciwej rywalizacji grajcie ciszej albo bez podkładu.
+          Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ — zapamięta się dla każdej kolędy osobno.
+          Podkład z głośników słychać też w mikrofonie, więc kolędometr może zawyżać wynik — dla uczciwej
+          rywalizacji grajcie ciszej albo bez podkładu. Instrumenty: Musyng Kite SoundFont (CC BY-SA 3.0).
+          Nuty kolęd: partytury z Wikipedii (CC BY-SA 4.0).
         </p>
       </details>
     </Modal>
@@ -309,22 +340,28 @@ function Range(props: {
   );
 }
 
-const INSTRUMENT_ICON: Record<InstrumentId, string> = {
-  piano: '🎹',
-  guitar: '🎸',
-  organ: '⛪',
-  strings: '🎻',
-  musicbox: '🎁',
-  bells: '🔔',
-};
+const icon = (id: InstrumentId) => INSTRUMENTS.find((i) => i.id === id)?.icon ?? '';
 
-function preview(instruments: InstrumentId[], volume: number) {
+/** Próbka brzmienia: pierwsze dwa wersy „Cichej nocy” z nut. */
+async function preview(instruments: InstrumentId[], melody: MelodyId, volume: number) {
   accompaniment.setVolume(volume);
-  accompaniment.playLine({
-    chords: ['C', 'F', 'G7', 'C'],
-    durationMs: 4000,
-    beatMs: 500,
+  await accompaniment.preload([...instruments, ...(melody === 'none' ? [] : [melody])]);
+  const song = await fetchSong('cicha-noc');
+  const lines = flattenSong(song);
+  const quarterMs = 60_000 / song.bpm;
+  const meter = (song.music?.meter ?? [4, 4]) as [number, number];
+  const first = lines[0]!;
+  const job = (l: typeof first) => ({
+    chords: l.chords,
+    music: l.music,
+    durationMs: l.beats * quarterMs,
+    quarterMs,
+    meter,
     instruments,
+    melody,
     keyShift: 0,
   });
+  accompaniment.playLine(job(first));
+  const second = lines[1];
+  if (second) setTimeout(() => accompaniment.playLine(job(second)), first.beats * quarterMs);
 }

@@ -1,0 +1,4 @@
+Próbki instrumentów: Musyng Kite SoundFont (autor: Gleitz / MIDI.js Soundfonts,
+https://github.com/gleitz/midi-js-soundfonts), wygenerowane z „Musyng Kite.sfpack”.
+Licencja: Creative Commons Attribution Share-Alike 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+W Kolędniku użyto podzbioru nut (co trzeci półton); przeglądarka stroi pozostałe.
