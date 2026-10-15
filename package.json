@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "local": "./kolednik-mac.command",
-    "import:music": "tsx tools/import/import.ts"
+    "import:music": "tsx tools/import/import.ts",
+    "narration": "tsx tools/narration/narration.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

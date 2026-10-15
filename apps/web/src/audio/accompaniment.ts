@@ -59,6 +59,8 @@ const LEVEL: Partial<Record<InstrumentId, number>> = {
 /** Nagrane nuty instrumentu i wzmocnienie każdej próbki (wyrównuje ciche nagrania do wspólnego poziomu). */
 /** Wzmocnienie całości (suwak głośności 0–1 → poziom podkładu słyszalny obok śpiewu). */
 const BOOST = 2;
+/** Poziom podkładu, gdy narrator podpowiada. */
+const DUCK = 0.45;
 
 type Manifest = Record<string, { notes: number[]; gains?: number[] }>;
 
@@ -82,6 +84,7 @@ class Accompaniment {
   private master: GainNode | null = null;
   private bus: GainNode | null = null;
   private volume = 0.7;
+  private ducked = false;
   private manifest: Promise<Manifest> | null = null;
   private buffers = new Map<string, Promise<AudioBuffer | null>>();
   private ready = new Map<string, { buf: AudioBuffer; gain: number }>();
@@ -101,7 +104,7 @@ class Accompaniment {
     if (!this.ctx) {
       this.ctx = new AudioContext();
       this.master = this.ctx.createGain();
-      this.master.gain.value = this.volume * BOOST;
+      this.master.gain.value = this.level();
       const comp = this.ctx.createDynamicsCompressor();
       comp.threshold.value = -14;
       comp.ratio.value = 3;
@@ -129,9 +132,25 @@ class Accompaniment {
     this.ensure();
   }
 
+  private level() {
+    return this.volume * BOOST * (this.ducked ? DUCK : 1);
+  }
+
   setVolume(v: number) {
     this.volume = v;
-    if (this.master) this.master.gain.value = v * BOOST;
+    if (!this.ctx || !this.master) return;
+    this.master.gain.cancelScheduledValues(this.ctx.currentTime);
+    this.master.gain.value = this.level();
+  }
+
+  /** Ściszenie na czas podpowiedzi narratora (płynne, bez trzasków). */
+  duck(on: boolean) {
+    this.ducked = on;
+    if (!this.ctx || !this.master) return;
+    const t = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(t);
+    this.master.gain.setValueAtTime(this.master.gain.value, t);
+    this.master.gain.setTargetAtTime(this.level(), t, on ? 0.06 : 0.25);
   }
 
   /** Ładuje próbki instrumentów (raz; potem z pamięci). */

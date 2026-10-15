@@ -5,3 +5,4 @@ export * from './scoring.js';
 export * from './vote.js';
 export * from './names.js';
 export * from './protocol.js';
+export * from './narration.js';

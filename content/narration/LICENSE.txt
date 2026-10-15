@@ -1,0 +1,5 @@
+Nagrania narratora wygenerowane programem Piper (https://github.com/OHF-Voice/piper1-gpl)
+skryptem tools/narration/narration.ts (pnpm narration), z modeli głosów rhasspy/piper-voices:
+- gosia/: pl_PL-gosia-medium — dane treningowe CC0 (https://github.com/OHF-Voice/voice-datasets),
+- bass/:  pl_PL-bass-high — Apache 2.0 (https://huggingface.co/blackbartblues/piper-pl-bass-high).
+Teksty kolęd: domena publiczna. Nazwa pliku to skrót tekstu (narrationKey w packages/shared/src/narration.ts).

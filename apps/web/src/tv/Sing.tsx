@@ -16,7 +16,7 @@ import { accompaniment } from '../audio/accompaniment';
 import { mic, useMic } from '../audio/mic';
 import { useSong } from '../net/api';
 import { getSocket, toServerTime } from '../net/socket';
-import { estimateSpeechMs, narrator, promptText } from '../narrator/narrator';
+import { narrator, promptText } from '../narrator/narrator';
 import { usePlayer, type PlayerPos } from '../lyrics/usePlayer';
 import { hostSettings, setSongKeyShift, songKeyShift } from '../settings';
 import { ChordDiagram, shiftChords, SylLine } from '../ui/Chords';
@@ -89,6 +89,18 @@ function SingSong({
   const playerRef = useRef(player);
   playerRef.current = player;
 
+  // Nagrania podpowiedzi tej kolędy pobieramy od razu, żeby narrator nie czekał na sieć.
+  useEffect(() => {
+    if (!settings.narrator) return;
+    void narrator.preload(
+      lines.map((l) => promptText(l.text, settings.narratorWhat)),
+      settings.narratorVoice,
+    );
+  }, [lines, settings.narrator, settings.narratorWhat, settings.narratorVoice]);
+
+  // Podkład cichnie, gdy narrator podpowiada — słowa są wtedy wyraźne.
+  useEffect(() => narrator.onSpeaking((on) => accompaniment.duck(on)), []);
+
   // Odliczanie przed startem; narrator podpowiada pierwszy wers.
   useEffect(() => {
     if (intro === INTRO_SEC && hostSettings.get().narrator) {
@@ -96,6 +108,7 @@ function SingSong({
       narrator.say(promptText(lines[0]!.text, s.narratorWhat), {
         volume: s.narratorVolume,
         rate: s.narratorRate,
+        voice: s.narratorVoice,
       });
     }
     if (intro === 0) {
@@ -167,16 +180,18 @@ function SingSong({
     const next = lines[pos.index + 1];
     if (!next) return;
     const text = promptText(next.text, settings.narratorWhat);
+    const opts = {
+      volume: settings.narratorVolume,
+      rate: settings.narratorRate,
+      voice: settings.narratorVoice,
+    };
     const elapsed = Date.now() - pos.startedAt;
     const delay =
       (durations[pos.index] ?? 0) -
       settings.narratorLeadSec * 1000 -
-      estimateSpeechMs(text, settings.narratorRate) -
+      narrator.durationMs(text, opts) -
       elapsed;
-    const t = setTimeout(
-      () => narrator.say(text, { volume: settings.narratorVolume, rate: settings.narratorRate }),
-      Math.max(0, delay),
-    );
+    const t = setTimeout(() => narrator.say(text, opts), Math.max(0, delay));
     return () => clearTimeout(t);
   }, [running, pos, lines, durations, settings]);
 

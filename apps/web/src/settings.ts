@@ -1,5 +1,6 @@
 import type { ThemeId } from '@kolednik/shared';
 import type { InstrumentId, MelodyId } from './audio/accompaniment';
+import type { NarratorVoice } from './narrator/narrator';
 import { createStore } from './storage';
 
 /** Ustawienia gospodarza (TV), pamiętane między uruchomieniami. */
@@ -11,6 +12,8 @@ export const hostSettings = createStore('kolednik:settings', {
   narratorLeadSec: 0.6,
   narratorWhat: 'line' as 'line' | 'start',
   narratorRate: 1.25,
+  /** Głos: nagrania przygotowane na serwerze albo syntezator przeglądarki. */
+  narratorVoice: 'gosia' as NarratorVoice,
   voteDurationSec: 20,
   tempo: 1,
   lastGroupName: '',

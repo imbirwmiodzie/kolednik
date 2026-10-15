@@ -11,10 +11,13 @@ import {
 import { fetchSong } from '../net/api';
 import { mic, useMic } from '../audio/mic';
 import { getSocket } from '../net/socket';
-import { narrator } from '../narrator/narrator';
+import { NARRATOR_VOICES, narrator, type NarratorVoice } from '../narrator/narrator';
 import { hostSettings } from '../settings';
 import { THEME_LIST } from '../themes/themes';
 import { Modal } from '../ui/Modal';
+
+/** Wers do odsłuchu głosu narratora (jest w nagraniach, bo pochodzi z kolędy). */
+const SAMPLE_LINE = 'Wśród nocnej ciszy głos się rozchodzi:';
 
 export function ThemePicker({ value, onChange }: { value: ThemeId; onChange: (t: ThemeId) => void }) {
   return (
@@ -68,7 +71,34 @@ export function SettingsModal({
             onChange={(e) => hostSettings.set({ narrator: e.target.checked })}
           />
           Włączony
-          {narrator.supported && !narrator.hasPolishVoice && (
+        </label>
+        <label className="row">
+          Głos:
+          <select
+            value={s.narratorVoice}
+            onChange={(e) => hostSettings.set({ narratorVoice: e.target.value as NarratorVoice })}
+          >
+            {NARRATOR_VOICES.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              narrator.unlock();
+              narrator.say(SAMPLE_LINE, {
+                volume: s.narratorVolume,
+                rate: s.narratorRate,
+                voice: s.narratorVoice,
+              });
+            }}
+          >
+            ▶ Odsłuchaj
+          </button>
+          {s.narratorVoice === 'browser' && narrator.supported && !narrator.hasPolishVoice && (
             <span className="warn">
               {' '}
               — brak polskiego głosu w tej przeglądarce (spróbujcie Chrome lub Edge)

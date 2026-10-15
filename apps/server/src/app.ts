@@ -49,6 +49,20 @@ export async function buildApp(
       immutable: true,
     });
   }
+  // Nagrania narratora: plik nazwany skrótem tekstu nie zmienia się, manifest — przy każdym nowym tekście.
+  const narration = path.join(config.contentDir, 'narration');
+  if (existsSync(narration)) {
+    await app.register(fastifyStatic, {
+      root: narration,
+      prefix: '/content/narration/',
+      decorateReply: false,
+      setHeaders: (res, file) =>
+        res.setHeader(
+          'Cache-Control',
+          file.endsWith('.mp3') ? 'public, max-age=2592000, immutable' : 'no-cache',
+        ),
+    });
+  }
 
   if (config.webDist && existsSync(config.webDist)) {
     await app.register(fastifyStatic, {

@@ -266,3 +266,38 @@ test('panel statystyk z logowaniem', async ({ page }) => {
   await page.getByRole('button', { name: 'Wyloguj' }).click();
   await expect(page.getByRole('button', { name: 'Zaloguj' })).toBeVisible();
 });
+
+test('narrator gra nagrania z serwera zamiast syntezatora przeglądarki', async ({ page: tv }) => {
+  // Zapisujemy, co odtwarzają elementy audio (narrator gra nagrania z pamięci, przez adres blob:).
+  await tv.addInitScript(() => {
+    const w = window as unknown as { played: string[] };
+    w.played = [];
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      w.played.push(this.src);
+      return play.call(this);
+    };
+  });
+  const clips: string[] = [];
+  tv.on('response', (r) => {
+    if (r.url().includes('/content/narration/') && r.url().endsWith('.mp3') && r.ok()) clips.push(r.url());
+  });
+  const played = () => tv.evaluate(() => (window as unknown as { played: string[] }).played.length);
+
+  await startEvening(tv, `Narrator ${Date.now()}`);
+  await tv.getByRole('button', { name: /Ustawienia/ }).click();
+  await tv.locator('select:has(option[value="gosia"])').selectOption('bass');
+  const before = await played();
+  await tv.getByRole('button', { name: /Odsłuchaj/ }).click();
+  await expect.poll(() => clips.some((u) => u.includes('/narration/bass/'))).toBe(true);
+  await expect.poll(played).toBeGreaterThan(before);
+  await tv.locator('select:has(option[value="gosia"])').selectOption('gosia');
+  await tv.getByRole('button', { name: 'Zamknij' }).click();
+
+  // Kolęda: nagrania podpowiedzi pobierają się od razu, pierwszy wers słychać w odliczaniu.
+  await tv.getByRole('button', { name: /Cicha noc/ }).click();
+  await expect.poll(() => clips.filter((u) => u.includes('/narration/gosia/')).length).toBeGreaterThan(5);
+  await expect
+    .poll(() => tv.evaluate(() => (window as unknown as { played: string[] }).played.at(-1)))
+    .toMatch(/^blob:/);
+});

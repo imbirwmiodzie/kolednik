@@ -4,3 +4,4 @@ content/songs
 *.md
 test-results
 playwright-report
+content/narration

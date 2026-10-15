@@ -24,7 +24,9 @@ telefonami, narrator podpowiada następny wers, a kolędometr ocenia, jak głoś
 Sterowanie na TV: `←/→` wers, `↑/↓` zwrotka, `spacja` pauza, `Esc` koniec i ocena, `F` pełny ekran
 (działa też pilot/prezenter z `PageUp/PageDown`).
 
-> Narrator potrzebuje polskiego głosu w przeglądarce — najlepiej Chrome lub Edge na Windows.
+> Narrator nie korzysta z syntezatora przeglądarki: każdy wers jest z góry przeczytany neuronowym głosem
+> i zapisany na serwerze (`content/narration`), więc brzmi tak samo na każdym komputerze. Głos (kobiecy lub
+> męski) i przycisk „Odsłuchaj” są w Ustawieniach; gdy narrator mówi, podkład na chwilę cichnie.
 
 ### Akordy i podkład
 
@@ -46,6 +48,15 @@ Sterowanie na TV: `←/→` wers, `↑/↓` zwrotka, `spacja` pauza, `Esc` konie
 `pnpm import:music <katalog z artykułami .wiki>` — dla kolęd z mapy `SOURCES` w `tools/import/import.ts` czyta
 partyturę, dzieli tekst z `content/songs/<slug>.json` na sylaby, dopasowuje je do nut (z powtórzeniami i melizmatami),
 harmonizuje i zapisuje pole `music` w pliku kolędy. Plik kolędy musi mieć tekst bez nut (pierwszy import).
+
+#### Nagrania narratora (dla opiekunów)
+
+`pnpm narration` czyta każdy wers (i jego początek, dla trybu „tylko początek wersu”) głosami
+[Piper](https://github.com/OHF-Voice/piper1-gpl) i zapisuje MP3 w `content/narration/<głos>/<skrót tekstu>.mp3`
+oraz długości nagrań w `manifest.json`. Potrzebny Python z `piper-tts` (`pip install piper-tts`, ścieżka przez
+`--python` albo `PIPER_PYTHON`) i ffmpeg; modele głosów pobierają się same do `~/.cache/kolednik/piper`. Generuje
+tylko brakujące nagrania i usuwa niepotrzebne, więc po dodaniu lub poprawieniu kolędy wystarczy uruchomić go ponownie.
+Wersy bez nagrania narrator czyta syntezatorem przeglądarki.
 
 ### Bezpieczeństwo
 
@@ -98,8 +109,8 @@ Zatrzymanie: `Ctrl+C`. Rekordy lądują w katalogu `data/` (usuń go, żeby zacz
   osobny gość (głosowanie, dyrygent).
 - **Mikrofon:** Chrome zapyta o zgodę; jeśli nie zapyta, sprawdź *Ustawienia systemowe → Prywatność
   i ochrona → Mikrofon → Google Chrome*.
-- **Narrator:** Chrome na Macu ma głos „Google polski”. W Safari używany jest systemowy głos „Zosia” —
-  gdy go brak, pobierz go w *Ustawienia systemowe → Dostępność → Treść mówiona → Głos systemowy*.
+- **Narrator:** gra nagrania z serwera, niczego nie trzeba instalować. Tylko wybrany w Ustawieniach
+  „Syntezator przeglądarki” korzysta z głosów systemu (w Safari „Zosia”).
 - Telewizor przez HDMI/AirPlay: przeciągnij okno na ekran TV i naciśnij `F` (pełny ekran).
 
 ## Rozwój
