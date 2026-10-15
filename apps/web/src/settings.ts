@@ -19,7 +19,8 @@ export const hostSettings = createStore('kolednik:settings', {
   chordDiagrams: true,
   // Zaawansowane: podkład muzyczny.
   accompaniment: false,
-  instrument: 'piano' as InstrumentId,
+  /** Instrumenty grające razem (można łączyć). */
+  instruments: ['piano'] as InstrumentId[],
   accompanimentVolume: 0.6,
   /** Zmiana tonacji (półtony) zapamiętana dla każdej kolędy osobno (F24). */
   keyBySong: {} as Record<string, number>,
@@ -37,3 +38,11 @@ export function setSongKeyShift(slug: string, keyShift: number) {
 
 /** Samouczek pokazujemy przy pierwszym uruchomieniu. */
 export const tutorialState = createStore('kolednik:tutorial', { done: false });
+
+// Starsze ustawienia miały jeden instrument — przenosimy go do listy.
+{
+  const legacy = (hostSettings.get() as { instrument?: InstrumentId }).instrument;
+  if (legacy && legacy !== 'piano' && hostSettings.get().instruments.join() === 'piano') {
+    hostSettings.set({ instruments: [legacy] });
+  }
+}

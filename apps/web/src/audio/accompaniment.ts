@@ -10,12 +10,21 @@ export const INSTRUMENTS = [
 ] as const;
 export type InstrumentId = (typeof INSTRUMENTS)[number]['id'];
 
+/** Gotowe zestawy instrumentów grających razem. */
+export const ENSEMBLES: { name: string; instruments: InstrumentId[] }[] = [
+  { name: 'Kolędnicy', instruments: ['guitar', 'bells'] },
+  { name: 'Kościół', instruments: ['organ', 'strings'] },
+  { name: 'Przy kominku', instruments: ['piano', 'strings'] },
+  { name: 'Pozytywka z dzwonkami', instruments: ['musicbox', 'bells'] },
+  { name: 'Cała orkiestra', instruments: ['piano', 'guitar', 'strings', 'bells'] },
+];
+
 type LineJob = {
   chords: string[];
   durationMs: number;
   /** Długość jednego uderzenia (ms) — rytm arpeggio/bicia. */
   beatMs: number;
-  instrument: InstrumentId;
+  instruments: InstrumentId[];
   keyShift: number;
   /** Ile ms wersu już minęło (np. po pauzie) — wcześniejsze dźwięki pomijamy. */
   offsetMs?: number;
@@ -80,7 +89,7 @@ class Accompaniment {
 
   /** Zagraj akordy jednego wersu, rozłożone równo na jego czas. */
   playLine(job: LineJob) {
-    if (!job.chords.length) return;
+    if (!job.chords.length || !job.instruments.length) return;
     this.stop();
     const ctx = this.ensure();
     const bus = this.freshBus();
@@ -88,19 +97,27 @@ class Accompaniment {
     const t0 = ctx.currentTime + 0.03 - offset;
     const seg = job.durationMs / 1000 / job.chords.length;
     const beat = Math.max(0.18, job.beatMs / 1000);
+    // Każdy instrument przez własne wzmocnienie — razem nie przesterowują.
+    const layers = job.instruments.map((inst) => {
+      const g = ctx.createGain();
+      g.gain.value = 1 / Math.sqrt(job.instruments.length);
+      g.connect(bus);
+      return { inst, out: g };
+    });
     job.chords.forEach((chord, i) => {
       const v = chordVoicing(chord, job.keyShift);
       if (!v) return;
       const start = t0 + i * seg;
       const end = start + seg;
       if (end <= ctx.currentTime) return;
-      this.pattern(job.instrument, v, Math.max(start, ctx.currentTime + 0.01), end, beat, bus);
+      for (const l of layers)
+        this.pattern(l.inst, v, Math.max(start, ctx.currentTime + 0.01), end, beat, l.out);
     });
   }
 
   /** Krótkie wejście przed kolędą: akord toniki na raz-dwa-trzy. */
-  countIn(chord: string, keyShift: number, beatMs: number, instrument: InstrumentId) {
-    this.playLine({ chords: [chord], durationMs: beatMs * 3, beatMs, instrument, keyShift });
+  countIn(chord: string, keyShift: number, beatMs: number, instruments: InstrumentId[]) {
+    this.playLine({ chords: [chord], durationMs: beatMs * 3, beatMs, instruments, keyShift });
   }
 
   private pattern(

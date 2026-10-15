@@ -114,7 +114,7 @@ function SingSong({
     if (!running) {
       const first = lines[0]?.chords[0];
       if (first && intro === INTRO_SEC - 1) {
-        accompaniment.countIn(first, keyShift, beatMs, settings.instrument);
+        accompaniment.countIn(first, keyShift, beatMs, settings.instruments);
       }
       return;
     }
@@ -125,12 +125,12 @@ function SingSong({
       chords: line.chords,
       durationMs: durations[pos.index] ?? 0,
       beatMs,
-      instrument: settings.instrument,
+      instruments: settings.instruments,
       keyShift,
       offsetMs: Date.now() - pos.startedAt,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, intro, pos, settings.accompaniment, settings.instrument, keyShift]);
+  }, [running, intro, pos, settings.accompaniment, settings.instruments, keyShift]);
   useEffect(() => accompaniment.setVolume(settings.accompanimentVolume), [settings.accompanimentVolume]);
   useEffect(() => () => accompaniment.stop(), []);
 

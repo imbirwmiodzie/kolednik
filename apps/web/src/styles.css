@@ -382,6 +382,8 @@ button.chip {
   display: grid;
   place-items: center;
   padding: 2em;
+  height: 100vh;
+  overflow-y: auto;
 }
 .start-card {
   width: min(44em, 100%);
@@ -1731,4 +1733,27 @@ body.admin {
 }
 .admin-log-head h2 {
   margin: 0;
+}
+
+.start-steps {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-top: 1.5em;
+  color: var(--muted);
+  font-weight: 800;
+}
+.start-steps .is-on {
+  color: var(--highlight);
+  border-bottom: 3px solid var(--accent);
+}
+.start-form {
+  margin-top: 1.2em;
+}
+.start-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8em;
+  flex-wrap: wrap;
+  align-items: center;
 }

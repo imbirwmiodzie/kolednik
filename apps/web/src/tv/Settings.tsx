@@ -1,5 +1,5 @@
 import type { ThemeId } from '@kolednik/shared';
-import { accompaniment, INSTRUMENTS, type InstrumentId } from '../audio/accompaniment';
+import { accompaniment, ENSEMBLES, INSTRUMENTS, type InstrumentId } from '../audio/accompaniment';
 import { mic, useMic } from '../audio/mic';
 import { getSocket } from '../net/socket';
 import { narrator } from '../narrator/narrator';
@@ -208,22 +208,51 @@ export function SettingsModal({
           />
           Graj podkład do kolęd (generowany z akordów)
         </label>
-        <div className="instrument-picker" role="radiogroup" aria-label="Instrument">
-          {INSTRUMENTS.map((inst) => (
+        <p className="hint">Instrumenty (można łączyć kilka):</p>
+        <div className="instrument-picker" role="group" aria-label="Instrumenty">
+          {INSTRUMENTS.map((inst) => {
+            const on = s.instruments.includes(inst.id);
+            return (
+              <button
+                key={inst.id}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                className={`chip ${on ? 'is-active' : ''}`}
+                onClick={() => {
+                  const next = on ? s.instruments.filter((i) => i !== inst.id) : [...s.instruments, inst.id];
+                  hostSettings.set({ instruments: next });
+                  if (!on) preview([inst.id], s.accompanimentVolume);
+                }}
+              >
+                {INSTRUMENT_ICON[inst.id]} {inst.name}
+              </button>
+            );
+          })}
+        </div>
+        <p className="hint">Gotowe zestawy:</p>
+        <div className="instrument-picker" aria-label="Zestawy">
+          {ENSEMBLES.map((e) => (
             <button
-              key={inst.id}
+              key={e.name}
               type="button"
-              role="radio"
-              aria-checked={s.instrument === inst.id}
-              className={`chip ${s.instrument === inst.id ? 'is-active' : ''}`}
+              className={`chip ${e.instruments.join() === s.instruments.join() ? 'is-active' : ''}`}
               onClick={() => {
-                hostSettings.set({ instrument: inst.id });
-                preview(inst.id, s.accompanimentVolume);
+                hostSettings.set({ instruments: e.instruments });
+                preview(e.instruments, s.accompanimentVolume);
               }}
             >
-              {INSTRUMENT_ICON[inst.id]} {inst.name}
+              {e.instruments.map((i) => INSTRUMENT_ICON[i]).join('')} {e.name}
             </button>
           ))}
+          <button
+            type="button"
+            className="chip"
+            disabled={!s.instruments.length}
+            onClick={() => preview(s.instruments, s.accompanimentVolume)}
+          >
+            ▶ Posłuchaj
+          </button>
         </div>
         <Range
           label="Głośność podkładu"
@@ -238,9 +267,9 @@ export function SettingsModal({
           }}
         />
         <p className="hint">
-          Kliknięcie instrumentu odtwarza próbkę. Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ —
-          zapamięta się dla każdej kolędy osobno. Uwaga: podkład z głośników słychać też w mikrofonie, więc
-          kolędometr może zawyżać wynik — dla uczciwej rywalizacji grajcie ciszej albo bez podkładu.
+          Włączenie instrumentu albo zestawu odtwarza próbkę. Tonację zmieniacie w trakcie kolędy przyciskami
+          ♭/♯ — zapamięta się dla każdej kolędy osobno. Uwaga: podkład z głośników słychać też w mikrofonie,
+          więc kolędometr może zawyżać wynik — dla uczciwej rywalizacji grajcie ciszej albo bez podkładu.
         </p>
       </details>
     </Modal>
@@ -289,13 +318,13 @@ const INSTRUMENT_ICON: Record<InstrumentId, string> = {
   bells: '🔔',
 };
 
-function preview(instrument: InstrumentId, volume: number) {
+function preview(instruments: InstrumentId[], volume: number) {
   accompaniment.setVolume(volume);
   accompaniment.playLine({
     chords: ['C', 'F', 'G7', 'C'],
     durationMs: 4000,
     beatMs: 500,
-    instrument,
+    instruments,
     keyShift: 0,
   });
 }

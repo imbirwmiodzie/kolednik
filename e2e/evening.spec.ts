@@ -29,8 +29,9 @@ async function startEvening(tv: Page, name: string, opts: { theme?: string; mic?
   await tv.getByRole('button', { name: 'Pomiń ✕' }).click();
   await tv.getByLabel('Kto dziś kolęduje?').fill(name);
   await tv.getByLabel('Hasło grupy').fill(PASSWORD);
+  await tv.getByRole('button', { name: 'Dalej ▶' }).click();
   if (opts.theme) await tv.getByRole('radio', { name: opts.theme }).click();
-  await tv.getByRole('button', { name: 'Zaczynamy wieczór' }).click();
+  await tv.getByRole('button', { name: /Zaczynamy wieczór/ }).click();
   if (opts.mic) {
     await tv.getByRole('button', { name: /Włącz mikrofon/ }).click();
     await expect(tv.getByText('Cisza na sali!')).toBeVisible();
@@ -40,6 +41,27 @@ async function startEvening(tv: Page, name: string, opts: { theme?: string; mic?
   }
   await expect(tv.locator('.join-card[data-join-url]')).toBeVisible();
 }
+
+test('start: przycisk Dalej, Enter w nazwie przechodzi do hasła, brak hasła = komunikat', async ({
+  page: tv,
+}) => {
+  await tv.goto('/');
+  await tv.getByRole('button', { name: 'Pomiń ✕' }).click();
+  const name = tv.getByLabel('Kto dziś kolęduje?');
+  await name.fill('Rodzina Testowa');
+  await name.press('Enter');
+  await expect(tv.getByLabel('Hasło grupy')).toBeFocused();
+  await expect(tv.getByRole('button', { name: 'Dalej ▶' })).toBeInViewport();
+  await tv.getByRole('button', { name: 'Dalej ▶' }).click();
+  await expect(tv.getByText(/Wpiszcie hasło grupy/)).toBeVisible();
+  await tv.screenshot({ path: 'test-results/shots/0-start.png' });
+  await tv.getByLabel('Hasło grupy').fill(PASSWORD);
+  await tv.getByLabel('Hasło grupy').press('Enter');
+  await expect(tv.getByText('Wybierzcie motyw dla „Rodzina Testowa”')).toBeVisible();
+  await expect(tv.getByRole('button', { name: /Zaczynamy wieczór/ })).toBeInViewport();
+  await tv.getByRole('button', { name: '◀ Wstecz' }).click();
+  await expect(tv.getByLabel('Kto dziś kolęduje?')).toHaveValue('Rodzina Testowa');
+});
 
 test('samouczek przy pierwszym otwarciu: kroki, przerwanie i ponowne otwarcie', async ({ page: tv }) => {
   await tv.goto('/');
@@ -155,7 +177,8 @@ test('złe hasło do istniejącej grupy nie wpuszcza', async ({ page: tv, browse
   await other.getByRole('button', { name: 'Pomiń ✕' }).click();
   await other.getByLabel('Kto dziś kolęduje?').fill(group.toUpperCase());
   await other.getByLabel('Hasło grupy').fill('zgaduję');
-  await other.getByRole('button', { name: 'Zaczynamy wieczór' }).click();
+  await other.getByRole('button', { name: 'Dalej ▶' }).click();
+  await other.getByRole('button', { name: /Zaczynamy wieczór/ }).click();
   await expect(other.getByText('Złe hasło dla tej grupy.')).toBeVisible();
 });
 
@@ -167,7 +190,9 @@ test('akordy z chwytami i podkład w trybie automatycznym', async ({ page: tv })
   await tv.getByLabel(/Pokazuj akordy nad tekstem/).check();
   await tv.getByText('Zaawansowane: podkład muzyczny').click();
   await tv.getByLabel(/Graj podkład/).check();
-  await tv.getByRole('radio', { name: /Gitara/ }).click();
+  await tv.getByRole('checkbox', { name: /Gitara/ }).click(); // pianino + gitara razem
+  await expect(tv.getByRole('checkbox', { name: /Pianino/ })).toHaveAttribute('aria-checked', 'true');
+  await expect(tv.getByRole('checkbox', { name: /Gitara/ })).toHaveAttribute('aria-checked', 'true');
   await tv.screenshot({ path: 'test-results/shots/8-settings.png' });
   await tv.getByRole('button', { name: 'Zamknij' }).click();
 
