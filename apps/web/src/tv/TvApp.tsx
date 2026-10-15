@@ -6,7 +6,7 @@ import { getSocket, useConnected, useSessionState } from '../net/socket';
 import { narrator } from '../narrator/narrator';
 import { navigate } from '../router';
 import { hostSettings } from '../settings';
-import { loadRaw } from '../storage';
+import { loadRaw, save } from '../storage';
 import { applyTheme } from '../themes/themes';
 import { Backdrop } from '../ui/Backdrop';
 import { AudioGate, Calibration } from './AudioGate';
@@ -17,6 +17,7 @@ import { SettingsModal } from './Settings';
 import { Sing } from './Sing';
 import { Summary } from './Summary';
 import { HOST_SESSION_KEY, type HostSessionRef } from './TvStart';
+import { Tutorial } from './Tutorial';
 import { Voting } from './Voting';
 
 export function TvApp({ sessionId }: { sessionId: string }) {
@@ -26,7 +27,8 @@ export function TvApp({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [gateOpen, setGateOpen] = useState(true);
   const [calibrating, setCalibrating] = useState(false);
-  const [modal, setModal] = useState<'settings' | 'book' | null>(null);
+  const [modal, setModal] = useState<'settings' | 'book' | 'tutorial' | null>(null);
+  const [welcome, setWelcome] = useState<string | null>(null);
 
   // Połączenie / ponowne połączenie jako gospodarz (N7: odświeżenie TV nie gubi wieczoru).
   useEffect(() => {
@@ -35,6 +37,12 @@ export function TvApp({ sessionId }: { sessionId: string }) {
     if (!ref || ref.sessionId !== sessionId) {
       setError('Ten wieczór był otwarty na innym komputerze albo w innej przeglądarce.');
       return;
+    }
+    if (ref.created) {
+      // Powitanie nowego konta — raz.
+      setWelcome(ref.groupName);
+      save(HOST_SESSION_KEY, { ...ref, created: false });
+      setTimeout(() => setWelcome(null), 9000);
     }
     const s = getSocket();
     const resume = () =>
@@ -122,9 +130,20 @@ export function TvApp({ sessionId }: { sessionId: string }) {
       {state.phase === 'SUMMARY' && state.summary && <Summary summary={state.summary} bySlug={bySlug} />}
 
       {modal === 'settings' && (
-        <SettingsModal onClose={() => setModal(null)} onTheme={setTheme} onCalibrate={calibrate} />
+        <SettingsModal
+          onClose={() => setModal(null)}
+          onTheme={setTheme}
+          onCalibrate={calibrate}
+          onTutorial={() => setModal('tutorial')}
+        />
       )}
       {modal === 'book' && <BookModal onClose={() => setModal(null)} bySlug={bySlug} />}
+      {modal === 'tutorial' && <Tutorial onClose={() => setModal(null)} />}
+      {welcome && !gateOpen && (
+        <div className="toast" role="status">
+          🎉 Założyliśmy konto „{welcome}”. Zapamiętajcie nazwę i hasło — za rok otworzą wasze rekordy!
+        </div>
+      )}
 
       {gateOpen && (
         <AudioGate

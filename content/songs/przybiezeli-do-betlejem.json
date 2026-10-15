@@ -12,10 +12,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Przybieżeli do Betlejem pasterze,"
+          "text": "Przybieżeli do Betlejem pasterze,",
+          "chords": "G D7 G"
         },
         {
-          "text": "Grając skocznie Dzieciąteczku na lirze."
+          "text": "Grając skocznie Dzieciąteczku na lirze.",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -27,10 +29,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Oddawali swe ukłony w pokorze"
+          "text": "Oddawali swe ukłony w pokorze",
+          "chords": "G D7 G"
         },
         {
-          "text": "Tobie z serca ochotnego, o Boże!"
+          "text": "Tobie z serca ochotnego, o Boże!",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -42,10 +46,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Anioł Pański sam ogłosił te dziwy,"
+          "text": "Anioł Pański sam ogłosił te dziwy,",
+          "chords": "G D7 G"
         },
         {
-          "text": "Których oni nie słyszeli, jak żywi."
+          "text": "Których oni nie słyszeli, jak żywi.",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -57,10 +63,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Dziwili się napowietrznej muzyce"
+          "text": "Dziwili się napowietrznej muzyce",
+          "chords": "G D7 G"
         },
         {
-          "text": "I myśleli, co to będzie za Dziecię?"
+          "text": "I myśleli, co to będzie za Dziecię?",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -72,10 +80,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Poznali Go Mesjaszem być prawdziwym,"
+          "text": "Poznali Go Mesjaszem być prawdziwym,",
+          "chords": "G D7 G"
         },
         {
-          "text": "Narodzonym dziś Panem miłościwym."
+          "text": "Narodzonym dziś Panem miłościwym.",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -87,10 +97,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "I anieli gromadą pilnują,"
+          "text": "I anieli gromadą pilnują,",
+          "chords": "G D7 G"
         },
         {
-          "text": "Panna czysta wraz z Józefem piastują."
+          "text": "Panna czysta wraz z Józefem piastują.",
+          "chords": "G D7 G"
         }
       ]
     },
@@ -103,10 +115,12 @@
     "refren": {
       "lines": [
         {
-          "text": "Chwała na wysokości, chwała na wysokości,"
+          "text": "Chwała na wysokości, chwała na wysokości,",
+          "chords": "C G D7 G"
         },
         {
-          "text": "A pokój na ziemi."
+          "text": "A pokój na ziemi.",
+          "chords": "D7 G"
         }
       ]
     }

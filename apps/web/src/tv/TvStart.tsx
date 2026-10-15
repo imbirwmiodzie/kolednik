@@ -1,20 +1,31 @@
 import { useEffect, useState } from 'react';
 import { getSocket } from '../net/socket';
 import { navigate } from '../router';
-import { hostSettings } from '../settings';
+import { hostSettings, tutorialState } from '../settings';
 import { loadRaw, save } from '../storage';
 import { applyTheme } from '../themes/themes';
 import { Backdrop } from '../ui/Backdrop';
 import { ThemePicker } from './Settings';
+import { Tutorial } from './Tutorial';
 
-export type HostSessionRef = { sessionId: string; hostToken: string; groupName: string; startedAt: number };
+export type HostSessionRef = {
+  sessionId: string;
+  hostToken: string;
+  groupName: string;
+  startedAt: number;
+  /** Konto zostało właśnie założone — TV pokaże powitanie. */
+  created?: boolean;
+};
 export const HOST_SESSION_KEY = 'kolednik:host-session';
 const EVENING_MS = 14 * 60 * 60 * 1000;
 
-/** Ekran startowy: nazwa grupy = „konto” (F40), wybór motywu, start wieczoru. */
+/** Ekran startowy: logowanie grupy (nazwa + hasło), wybór motywu, start wieczoru. */
 export function TvStart() {
   const settings = hostSettings.use();
+  const tutorial = tutorialState.use();
+  const [showTutorial, setShowTutorial] = useState(!tutorial.done);
   const [name, setName] = useState(settings.lastGroupName);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const previous = loadRaw<HostSessionRef>(HOST_SESSION_KEY);
@@ -27,12 +38,13 @@ export function TvStart() {
 
   const start = async () => {
     if (!name.trim()) return setError('Wpiszcie nazwę grupy, np. „Rodzina Kowalskich”.');
+    if (!password) return setError('Wpiszcie hasło grupy (nowa grupa: wymyślcie je teraz).');
     setBusy(true);
     setError(null);
     try {
       const r = await getSocket()
         .timeout(8000)
-        .emitWithAck('host:create', { groupName: name, theme: settings.theme });
+        .emitWithAck('host:create', { groupName: name, password, theme: settings.theme });
       if (!r.ok) return setError(r.error);
       hostSettings.set({ lastGroupName: name.trim() });
       save(HOST_SESSION_KEY, {
@@ -40,6 +52,7 @@ export function TvStart() {
         hostToken: r.hostToken,
         groupName: name.trim(),
         startedAt: Date.now(),
+        created: r.created,
       } satisfies HostSessionRef);
       navigate(`/tv/${r.sessionId}`);
     } catch {
@@ -75,8 +88,19 @@ export function TvStart() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+          <label htmlFor="password">Hasło grupy</label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            maxLength={200}
+            placeholder="nowa grupa? wymyślcie hasło (min. 4 znaki)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           <p className="hint">
-            Ta nazwa to wasze „konto” — wpiszcie ją za rok, a rekordy będą na was czekać.
+            Nazwa i hasło to wasze konto — za rok wpiszcie je znowu, a rekordy będą na was czekać. Nowa nazwa
+            zakłada nowe konto.
           </p>
           <ThemePicker value={settings.theme} onChange={(theme) => hostSettings.set({ theme })} />
           {error && <p className="error">{error}</p>}
@@ -94,9 +118,20 @@ export function TvStart() {
           )}
         </form>
         <p className="join-hint">
-          Jesteś gościem z telefonem? <a href="/j">Dołącz kodem z telewizora</a>
+          Jesteś gościem z telefonem? <a href="/j">Dołącz kodem z telewizora</a> ·{' '}
+          <button type="button" className="link" onClick={() => setShowTutorial(true)}>
+            Jak to działa?
+          </button>
         </p>
       </div>
+      {showTutorial && (
+        <Tutorial
+          onClose={() => {
+            tutorialState.set({ done: true });
+            setShowTutorial(false);
+          }}
+        />
+      )}
     </div>
   );
 }

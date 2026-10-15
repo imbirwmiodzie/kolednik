@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidChord, splitChords } from './chords.js';
 
 export const MOTIFS = ['star', 'stable', 'angel', 'candle', 'tree', 'moon', 'crown', 'bells'] as const;
 export type Motif = (typeof MOTIFS)[number];
@@ -7,6 +8,11 @@ const lineSchema = z.object({
   text: z.string().min(1),
   /** Czas wersu w uderzeniach; gdy brak — liczony z liczby sylab. */
   beats: z.number().positive().optional(),
+  /** Akordy wersu oddzielone spacjami, rozłożone równo na czas wersu, np. "C G7 C". */
+  chords: z
+    .string()
+    .optional()
+    .refine((c) => splitChords(c).every(isValidChord), { message: 'Nieznany akord' }),
 });
 
 const stanzaSchema = z.union([
@@ -39,6 +45,7 @@ export type Song = z.infer<typeof songSchema>;
 export type SongMeta = Pick<Song, 'slug' | 'title' | 'art' | 'image'> & {
   stanzaCount: number;
   lineCount: number;
+  hasChords: boolean;
 };
 
 export type FlatLine = {
@@ -50,6 +57,7 @@ export type FlatLine = {
   part: 'verse' | 'chorus';
   text: string;
   beats: number;
+  chords: string[];
 };
 
 const VOWELS = 'aąeęioóuy';
@@ -86,6 +94,7 @@ export function flattenSong(song: Song): FlatLine[] {
         part: isChorus ? 'chorus' : 'verse',
         text: line.text,
         beats: line.beats ?? countSyllables(line.text) + LINE_GAP_BEATS,
+        chords: splitChords(line.chords),
       });
     }
   });
@@ -108,5 +117,6 @@ export function songMeta(song: Song): SongMeta {
     image: song.image,
     stanzaCount: verseCount(song),
     lineCount: flattenSong(song).length,
+    hasChords: flattenSong(song).some((l) => l.chords.length > 0),
   };
 }

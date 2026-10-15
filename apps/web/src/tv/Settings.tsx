@@ -1,5 +1,7 @@
 import type { ThemeId } from '@kolednik/shared';
+import { accompaniment, INSTRUMENTS, type InstrumentId } from '../audio/accompaniment';
 import { mic, useMic } from '../audio/mic';
+import { getSocket } from '../net/socket';
 import { narrator } from '../narrator/narrator';
 import { hostSettings } from '../settings';
 import { THEME_LIST } from '../themes/themes';
@@ -31,10 +33,12 @@ export function SettingsModal({
   onClose,
   onTheme,
   onCalibrate,
+  onTutorial,
 }: {
   onClose: () => void;
   onTheme: (t: ThemeId) => void;
   onCalibrate: () => void;
+  onTutorial: () => void;
 }) {
   const s = hostSettings.use();
   const m = useMic();
@@ -127,6 +131,28 @@ export function SettingsModal({
       </section>
 
       <section className="settings-section">
+        <h3>Akordy na gitarę</h3>
+        <label className="row">
+          <input
+            type="checkbox"
+            checked={s.chords}
+            onChange={(e) => hostSettings.set({ chords: e.target.checked })}
+          />
+          Pokazuj akordy nad tekstem (na TV; na telefonach każdy włącza sam)
+        </label>
+        <label className="row">
+          <input
+            type="checkbox"
+            checked={s.chordDiagrams}
+            disabled={!s.chords}
+            onChange={(e) => hostSettings.set({ chordDiagrams: e.target.checked })}
+          />
+          Pokazuj chwyty (diagramy gryfu)
+        </label>
+        <p className="hint">Akordy przesuwają się razem ze zmianą tonacji (♭/♯ na ekranie śpiewania).</p>
+      </section>
+
+      <section className="settings-section">
         <h3>Mikrofon i kolędometr</h3>
         <p>
           Stan: <strong>{MIC_LABEL[m.status]}</strong>
@@ -153,6 +179,70 @@ export function SettingsModal({
           Dźwięk jest analizowany tylko w tej przeglądarce — nic nie jest nagrywane ani wysyłane.
         </p>
       </section>
+
+      <section className="settings-section">
+        <h3>Dołączanie i bezpieczeństwo</h3>
+        <p className="hint">
+          Link w kodzie QR zawiera tajny klucz tylko tego wieczoru. Jeśli kod lub link trafił do kogoś obcego,
+          wygenerujcie nowy — stary przestanie działać, a osoby już dołączone zostaną.
+        </p>
+        <div className="row">
+          <button className="btn" onClick={() => getSocket().emit('host:rotate-code')}>
+            🔒 Nowy kod i link
+          </button>
+          <button className="btn btn-ghost" onClick={onTutorial}>
+            ❓ Pokaż samouczek
+          </button>
+        </div>
+      </section>
+
+      <details className="settings-section advanced">
+        <summary>
+          <h3>Zaawansowane: podkład muzyczny</h3>
+        </summary>
+        <label className="row">
+          <input
+            type="checkbox"
+            checked={s.accompaniment}
+            onChange={(e) => hostSettings.set({ accompaniment: e.target.checked })}
+          />
+          Graj podkład do kolęd (generowany z akordów)
+        </label>
+        <div className="instrument-picker" role="radiogroup" aria-label="Instrument">
+          {INSTRUMENTS.map((inst) => (
+            <button
+              key={inst.id}
+              type="button"
+              role="radio"
+              aria-checked={s.instrument === inst.id}
+              className={`chip ${s.instrument === inst.id ? 'is-active' : ''}`}
+              onClick={() => {
+                hostSettings.set({ instrument: inst.id });
+                preview(inst.id, s.accompanimentVolume);
+              }}
+            >
+              {INSTRUMENT_ICON[inst.id]} {inst.name}
+            </button>
+          ))}
+        </div>
+        <Range
+          label="Głośność podkładu"
+          min={0.05}
+          max={1}
+          step={0.05}
+          value={s.accompanimentVolume}
+          format={(v) => `${Math.round(v * 100)}%`}
+          onChange={(accompanimentVolume) => {
+            hostSettings.set({ accompanimentVolume });
+            accompaniment.setVolume(accompanimentVolume);
+          }}
+        />
+        <p className="hint">
+          Kliknięcie instrumentu odtwarza próbkę. Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ —
+          zapamięta się dla każdej kolędy osobno. Uwaga: podkład z głośników słychać też w mikrofonie, więc
+          kolędometr może zawyżać wynik — dla uczciwej rywalizacji grajcie ciszej albo bez podkładu.
+        </p>
+      </details>
     </Modal>
   );
 }
@@ -188,4 +278,24 @@ function Range(props: {
       <output>{props.format(props.value)}</output>
     </label>
   );
+}
+
+const INSTRUMENT_ICON: Record<InstrumentId, string> = {
+  piano: '🎹',
+  guitar: '🎸',
+  organ: '⛪',
+  strings: '🎻',
+  musicbox: '🎁',
+  bells: '🔔',
+};
+
+function preview(instrument: InstrumentId, volume: number) {
+  accompaniment.setVolume(volume);
+  accompaniment.playLine({
+    chords: ['C', 'F', 'G7', 'C'],
+    durationMs: 4000,
+    beatMs: 500,
+    instrument,
+    keyShift: 0,
+  });
 }

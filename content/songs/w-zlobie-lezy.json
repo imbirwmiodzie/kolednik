@@ -6,31 +6,38 @@
     "hue": 15
   },
   "bpm": 130,
-  "key": "F",
+  "key": "G",
   "stanzas": [
     {
       "type": "verse",
       "lines": [
         {
-          "text": "W żłobie leży, któż pobieży"
+          "text": "W żłobie leży, któż pobieży",
+          "chords": "G D7"
         },
         {
-          "text": "Kolędować Małemu,"
+          "text": "Kolędować Małemu,",
+          "chords": "D7 G"
         },
         {
-          "text": "Jezusowi, Chrystusowi,"
+          "text": "Jezusowi, Chrystusowi,",
+          "chords": "G D7"
         },
         {
-          "text": "Dziś dla nas zrodzonemu?"
+          "text": "Dziś dla nas zrodzonemu?",
+          "chords": "D7 G"
         },
         {
-          "text": "Pastuszkowie, przybywajcie,"
+          "text": "Pastuszkowie, przybywajcie,",
+          "chords": "C G"
         },
         {
-          "text": "Jemu wdzięcznie przygrywajcie"
+          "text": "Jemu wdzięcznie przygrywajcie",
+          "chords": "D7 G"
         },
         {
-          "text": "Jako Panu naszemu."
+          "text": "Jako Panu naszemu.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -38,25 +45,32 @@
       "type": "verse",
       "lines": [
         {
-          "text": "My zaś sami z piosneczkami"
+          "text": "My zaś sami z piosneczkami",
+          "chords": "G D7"
         },
         {
-          "text": "Za wami pospieszymy,"
+          "text": "Za wami pospieszymy,",
+          "chords": "D7 G"
         },
         {
-          "text": "A tak tego Maleńkiego"
+          "text": "A tak tego Maleńkiego",
+          "chords": "G D7"
         },
         {
-          "text": "Niech wszyscy zobaczymy:"
+          "text": "Niech wszyscy zobaczymy:",
+          "chords": "D7 G"
         },
         {
-          "text": "Jak ubogo narodzony,"
+          "text": "Jak ubogo narodzony,",
+          "chords": "C G"
         },
         {
-          "text": "Płacze w stajni położony,"
+          "text": "Płacze w stajni położony,",
+          "chords": "D7 G"
         },
         {
-          "text": "Więc Go dziś ucieszymy."
+          "text": "Więc Go dziś ucieszymy.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -64,25 +78,32 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Naprzód tedy niech tak wszędy"
+          "text": "Naprzód tedy niech tak wszędy",
+          "chords": "G D7"
         },
         {
-          "text": "Zabrzmi świat w wesołości,"
+          "text": "Zabrzmi świat w wesołości,",
+          "chords": "D7 G"
         },
         {
-          "text": "Że posłany nam jest dany"
+          "text": "Że posłany nam jest dany",
+          "chords": "G D7"
         },
         {
-          "text": "Emanuel w niskości."
+          "text": "Emanuel w niskości.",
+          "chords": "D7 G"
         },
         {
-          "text": "Jego tedy przywitajcie,"
+          "text": "Jego tedy przywitajcie,",
+          "chords": "C G"
         },
         {
-          "text": "Z aniołami zaśpiewajcie:"
+          "text": "Z aniołami zaśpiewajcie:",
+          "chords": "D7 G"
         },
         {
-          "text": "Chwała na wysokości!"
+          "text": "Chwała na wysokości!",
+          "chords": "D7 G"
         }
       ]
     }

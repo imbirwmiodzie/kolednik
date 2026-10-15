@@ -2,7 +2,10 @@
 
 Plan do [WYMAGANIA.md](WYMAGANIA.md) (wersja 0.4). Numery `F…`/`N…` odnoszą się do wymagań.
 
-> **Stan:** etapy **M0–M6 (MVP) zrobione** — testy jednostkowe, integracyjne i e2e przechodzą.
+> **Stan:** etapy **M0–M6 (MVP) zrobione**, do tego wersja 0.5: samouczek, akordy z chwytami, podkład
+> syntezowany z akordów (6 instrumentów, zmiana tonacji), konta z hasłem, klucz w linku QR, panel statystyk.
+> M7 jest zrobiony inaczej niż w planie — podkład z akordów zamiast plików MIDI (bez melodii).
+> Testy jednostkowe, integracyjne i e2e przechodzą.
 > Do zrobienia przed świętami: wdrożenie na serwer i przegląd tekstów (patrz README). Dalej etap 2 (M7–M9).
 >
 > Odstępstwa od planu w implementacji:

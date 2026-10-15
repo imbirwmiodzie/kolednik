@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { accompaniment } from '../audio/accompaniment';
 import { mic } from '../audio/mic';
 import { narrator } from '../narrator/narrator';
 
@@ -21,6 +22,7 @@ export function AudioGate({ onDone }: { onDone: (withMic: boolean) => void }) {
             onClick={async () => {
               setBusy(true);
               narrator.unlock();
+              accompaniment.unlock();
               const ok = await mic.start();
               onDone(ok);
             }}
@@ -32,6 +34,7 @@ export function AudioGate({ onDone }: { onDone: (withMic: boolean) => void }) {
             disabled={busy}
             onClick={() => {
               narrator.unlock();
+              accompaniment.unlock();
               onDone(false);
             }}
           >

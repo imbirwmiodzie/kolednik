@@ -5,6 +5,11 @@ import type { ClientToServerEvents, PublicState, ServerToClientEvents } from '@k
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 let socket: AppSocket | null = null;
+
+/** Kod i tajny klucz do linku w kodzie QR — serwer wysyła je tylko do TV. */
+type JoinInfo = { code: string; token: string };
+let joinInfo: JoinInfo | null = null;
+const joinListeners = new Set<() => void>();
 /** Przesunięcie zegara: czas serwera = Date.now() + offset. */
 let offset = 0;
 
@@ -12,6 +17,10 @@ export function getSocket(): AppSocket {
   if (!socket) {
     socket = io({ reconnectionDelayMax: 3000 });
     socket.on('connect', () => void syncClock());
+    socket.on('join-info', (info) => {
+      joinInfo = info;
+      for (const l of joinListeners) l();
+    });
   }
   return socket;
 }
@@ -66,4 +75,15 @@ export function useSessionState(): PublicState | null {
     };
   }, []);
   return state;
+}
+
+export function useJoinInfo(): JoinInfo | null {
+  return useSyncExternalStore(
+    (cb) => {
+      getSocket();
+      joinListeners.add(cb);
+      return () => joinListeners.delete(cb);
+    },
+    () => joinInfo,
+  );
 }

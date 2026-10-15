@@ -9,6 +9,10 @@ services:
     restart: unless-stopped
     ports:
       - '${KOLEDNIK_BIND:-127.0.0.1}:${KOLEDNIK_PORT:-3000}:3000'
+    environment:
+      # Login i hasło do panelu /admin — ustaw własne w pliku deploy/.env (patrz .env.example).
+      ADMIN_USER: ${ADMIN_USER:-lama}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ustaw ADMIN_PASSWORD w deploy/.env}
     volumes:
       - kolednik-data:/data
 

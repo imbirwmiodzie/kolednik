@@ -12,10 +12,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Jezus malusieńki leży wśród stajenki,"
+          "text": "Jezus malusieńki leży wśród stajenki,",
+          "chords": "D A7 D"
         },
         {
-          "text": "Płacze z zimna, nie dała Mu Matula sukienki."
+          "text": "Płacze z zimna, nie dała Mu Matula sukienki.",
+          "chords": "G D A7 D"
         }
       ]
     },
@@ -23,10 +25,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Bo uboga była, rąbek z głowy zdjęła,"
+          "text": "Bo uboga była, rąbek z głowy zdjęła,",
+          "chords": "D A7 D"
         },
         {
-          "text": "W który Dziecię owinąwszy, siankiem Je okryła."
+          "text": "W który Dziecię owinąwszy, siankiem Je okryła.",
+          "chords": "G D A7 D"
         }
       ]
     },
@@ -34,10 +38,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Nie ma kolebeczki ani poduszeczki,"
+          "text": "Nie ma kolebeczki ani poduszeczki,",
+          "chords": "D A7 D"
         },
         {
-          "text": "We żłobie Mu położyła siana pod główeczki."
+          "text": "We żłobie Mu położyła siana pod główeczki.",
+          "chords": "G D A7 D"
         }
       ]
     }

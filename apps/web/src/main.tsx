@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { AdminApp } from './admin/AdminApp';
 import { PhoneApp } from './phone/PhoneApp';
 import { usePath } from './router';
 import { TvApp } from './tv/TvApp';
@@ -9,7 +10,8 @@ function App() {
   const path = usePath();
   const tv = path.match(/^\/tv\/([\w-]+)/);
   if (tv) return <TvApp key={tv[1]} sessionId={tv[1]!} />;
-  const join = path.match(/^\/j(?:\/([A-Za-z]{4}))?\/?$/);
+  if (path.startsWith('/admin')) return <AdminApp />;
+  const join = path.match(/^\/j(?:\/([A-Za-z]{6}))?\/?$/);
   if (join) return <PhoneApp code={join[1]} />;
   return <TvStart />;
 }

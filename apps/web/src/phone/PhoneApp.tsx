@@ -3,7 +3,6 @@ import { flattenSong, verseCount, type PublicState, type SongMeta } from '@koled
 import { SongArt } from '../art/SongArt';
 import { useSong, useSongs } from '../net/api';
 import { getSocket, serverNow, useConnected, useSessionState } from '../net/socket';
-import { navigate } from '../router';
 import { createStore, randomId } from '../storage';
 import { applyTheme } from '../themes/themes';
 import { Backdrop } from '../ui/Backdrop';
@@ -11,6 +10,7 @@ import { SPIN_MS } from '../tv/Reveal';
 import { ScoreBlock } from '../tv/Summary';
 import { useCountdown } from '../tv/Voting';
 import { blockLabel } from '../tv/Sing';
+import { ChordRow, shiftChords } from '../ui/Chords';
 
 // `?gosc=2` w adresie = osobny gość w tej karcie — do testów kilku „telefonów” na jednym komputerze.
 const guest = new URLSearchParams(location.search).get('gosc');
@@ -18,16 +18,33 @@ const phone = createStore(guest ? `kolednik:phone:${guest}` : 'kolednik:phone', 
   clientId: '',
   nick: '',
   fontScale: 1,
+  chords: false,
+  /** Ostatni wieczór — po odświeżeniu strony telefon wraca bez skanowania. */
+  lastSession: null as { sessionId: string; at: number } | null,
 });
 if (!phone.get().clientId) phone.set({ clientId: randomId() });
+
+const CODE_LENGTH = 6;
+const EVENING_MS = 14 * 60 * 60 * 1000;
+
+/** Tajny klucz wieczoru z linku w kodzie QR (`/j#k=…`); usuwamy go z paska adresu. */
+function takeTokenFromUrl(): string | null {
+  const m = /[#&]k=([\w-]+)/.exec(location.hash);
+  if (!m) return null;
+  history.replaceState(null, '', location.pathname + location.search);
+  return m[1]!;
+}
+
+type JoinRequest = { token?: string; code?: string; sessionId?: string };
 
 export function PhoneApp({ code: urlCode }: { code: string | undefined }) {
   const state = useSessionState();
   const connected = useConnected();
   const settings = phone.use();
   const [code, setCode] = useState(urlCode?.toUpperCase() ?? '');
-  const [joinedCode, setJoinedCode] = useState<string | null>(null);
+  const [joinedId, setJoinedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [trying, setTrying] = useState(true);
 
   useEffect(() => {
     document.body.className = 'phone';
@@ -37,18 +54,37 @@ export function PhoneApp({ code: urlCode }: { code: string | undefined }) {
     if (state) applyTheme(state.theme);
   }, [state]);
 
-  // Po zerwaniu połączenia telefon sam wraca do wieczoru (N7).
+  const join = (req: JoinRequest, silent = false) => {
+    setError(null);
+    getSocket().emit(
+      'phone:join',
+      { ...req, clientId: phone.get().clientId, nick: phone.get().nick },
+      (r) => {
+        setTrying(false);
+        if (!r.ok) {
+          if (!silent) setError(r.error);
+          return;
+        }
+        setJoinedId(r.sessionId);
+        phone.set({ lastSession: { sessionId: r.sessionId, at: Date.now() } });
+      },
+    );
+  };
+
+  // Po zerwaniu połączenia telefon sam wraca do wieczoru (N7) — jako znany uczestnik, bez klucza.
   useEffect(() => {
-    if (!joinedCode) return;
+    if (!joinedId) return;
     const s = getSocket();
     const rejoin = () =>
       s.emit(
         'phone:join',
-        { code: joinedCode, clientId: phone.get().clientId, nick: phone.get().nick },
+        { sessionId: joinedId, clientId: phone.get().clientId, nick: phone.get().nick },
         (r) => {
           if (!r.ok) {
-            setError(r.error);
-            setJoinedCode(null);
+            setError(
+              r.error === 'Wieczór się skończył' ? 'Wieczór się skończył — zeskanujcie nowy kod.' : r.error,
+            );
+            setJoinedId(null);
           }
         },
       );
@@ -56,64 +92,64 @@ export function PhoneApp({ code: urlCode }: { code: string | undefined }) {
     return () => {
       s.off('connect', rejoin);
     };
-  }, [joinedCode]);
+  }, [joinedId]);
 
-  const join = (c: string) => {
-    setError(null);
-    getSocket().emit('phone:join', { code: c, clientId: settings.clientId, nick: settings.nick }, (r) => {
-      if (!r.ok) return setError(r.error);
-      setJoinedCode(c);
-      if (urlCode !== c) navigate(`/j/${c}${location.search}`, true);
-    });
-  };
-
-  // Link z kodu QR — od razu dołączamy.
-  const autoJoined = useRef(false);
+  // Start: link z QR → klucz; inaczej kod z adresu albo powrót do ostatniego wieczoru.
+  const started = useRef(false);
   useEffect(() => {
-    if (urlCode && !autoJoined.current) {
-      autoJoined.current = true;
-      join(urlCode.toUpperCase());
-    }
+    if (started.current) return;
+    started.current = true;
+    const token = takeTokenFromUrl();
+    const last = phone.get().lastSession;
+    if (token) join({ token });
+    else if (urlCode) join({ code: urlCode.toUpperCase() });
+    else if (last && Date.now() - last.at < EVENING_MS) join({ sessionId: last.sessionId }, true);
+    else setTrying(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlCode]);
+  }, []);
 
-  if (!joinedCode || !state) {
+  if (!joinedId || !state) {
     return (
       <div className="screen phone-join">
         <div className="card">
           <div className="brand-big">
             <span className="brand-star">✦</span> Kolędnik
           </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              join(code.trim().toUpperCase());
-            }}
-          >
-            <label htmlFor="code">Kod z telewizora</label>
-            <input
-              id="code"
-              className="code-input"
-              value={code}
-              maxLength={4}
-              autoCapitalize="characters"
-              autoComplete="off"
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="ABCD"
-            />
-            <label htmlFor="nick">Twoje imię (opcjonalnie)</label>
-            <input
-              id="nick"
-              value={settings.nick}
-              maxLength={30}
-              onChange={(e) => phone.set({ nick: e.target.value })}
-              placeholder="np. Ciocia Basia"
-            />
-            {error && <p className="error">{error}</p>}
-            <button className="btn btn-primary btn-xl" disabled={code.trim().length !== 4}>
-              Dołącz
-            </button>
-          </form>
+          {trying ? (
+            <p className="loading">Dołączanie…</p>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                join({ code: code.trim().toUpperCase() });
+              }}
+            >
+              <p className="hint">Najprościej: zeskanujcie aparatem kod QR z telewizora.</p>
+              <label htmlFor="code">Albo wpiszcie kod z telewizora</label>
+              <input
+                id="code"
+                className="code-input"
+                value={code}
+                maxLength={CODE_LENGTH}
+                autoCapitalize="characters"
+                autoComplete="off"
+                onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+                placeholder="ABCDEF"
+              />
+              <label htmlFor="nick">Twoje imię (opcjonalnie)</label>
+              <input
+                id="nick"
+                value={settings.nick}
+                maxLength={30}
+                onChange={(e) => phone.set({ nick: e.target.value })}
+                placeholder="np. Ciocia Basia"
+              />
+              {error && <p className="error">{error}</p>}
+              <button className="btn btn-primary btn-xl" disabled={code.trim().length !== CODE_LENGTH}>
+                Dołącz
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
@@ -271,7 +307,8 @@ function PhoneReveal({ state, bySlug }: { state: PublicState; bySlug: Map<string
 /** Tekst kolędy zsynchronizowany z TV (F20) + przyciski dyrygenta (F18). */
 function PhoneLyrics({ state }: { state: PublicState }) {
   const song = useSong(state.song!.slug);
-  const { clientId, fontScale } = phone.use();
+  const { clientId, fontScale, chords: showChords } = phone.use();
+  const keyShift = state.song!.keyShift;
   const lines = useMemo(() => (song ? flattenSong(song) : []), [song]);
   const verses = song ? verseCount(song) : 0;
   const pos = state.song!.position;
@@ -293,6 +330,15 @@ function PhoneLyrics({ state }: { state: PublicState }) {
         <strong>{song.title}</strong>
         <span>{blockLabel(lines[pos?.index ?? 0], verses)}</span>
         <span className="font-ctl">
+          {song && flattenSong(song).some((l) => l.chords.length) && (
+            <button
+              className={`btn btn-small ${showChords ? 'btn-primary' : ''}`}
+              aria-pressed={showChords}
+              onClick={() => phone.set({ chords: !showChords })}
+            >
+              🎸
+            </button>
+          )}
           <button
             className="btn btn-small"
             onClick={() => phone.set({ fontScale: Math.max(0.8, fontScale - 0.15) })}
@@ -321,6 +367,9 @@ function PhoneLyrics({ state }: { state: PublicState }) {
                 ref={isCur ? curRef : undefined}
                 className={`pl ${isCur ? 'is-cur' : ''} ${pos && l.index < pos.index ? 'is-past' : ''} ${l.part === 'chorus' ? 'is-chorus' : ''}`}
               >
+                {showChords && l.chords.length > 0 && (
+                  <ChordRow chords={shiftChords(l.chords, keyShift, song.key)} className="phone" />
+                )}
                 {l.text}
                 {isCur && pos && (
                   <span

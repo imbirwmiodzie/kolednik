@@ -8,6 +8,11 @@ import {
   scorePerformance,
   songSchema,
   type Frame,
+  transposeChord,
+  transposeKey,
+  isValidChord,
+  chordVoicing,
+  polishChordName,
 } from './index.js';
 
 describe('countSyllables', () => {
@@ -132,5 +137,39 @@ describe('normalizeGroupName', () => {
   it('ignoruje wielkość liter i spacje', () => {
     expect(normalizeGroupName('  Rodzina   KOWALSKICH ')).toBe(normalizeGroupName('rodzina kowalskich'));
     expect(normalizeGroupName('ŻÓŁW')).toBe('żółw');
+  });
+});
+
+describe('akordy', () => {
+  it('transponuje z zapisem zależnym od tonacji', () => {
+    expect(transposeChord('C', 2, 'C')).toBe('D');
+    expect(transposeChord('G7', 3, 'C')).toBe('Bb7'); // Eb-dur → bemole
+    expect(transposeChord('Am', -2, 'C')).toBe('Gm');
+    expect(transposeChord('Am', 1, 'C')).toBe('Bbm');
+    expect(transposeChord('E', 2, 'G')).toBe('F#'); // A-dur → krzyżyki
+    expect(transposeKey('F', 1)).toBe('F#');
+  });
+  it('odrzuca nieznane akordy w pliku kolędy', () => {
+    expect(isValidChord('Cadd9')).toBe(false);
+    expect(isValidChord('C#m7')).toBe(true);
+    expect(isValidChord('Hm')).toBe(true);
+    expect(() =>
+      songSchema.parse({
+        slug: 'x',
+        title: 'x',
+        art: { motif: 'star', hue: 1 },
+        bpm: 100,
+        stanzas: [{ type: 'verse', lines: [{ text: 'a', chords: 'C Xyz' }] }],
+      }),
+    ).toThrow();
+  });
+  it('układa dźwięki akordu', () => {
+    expect(chordVoicing('C')).toEqual({ bass: 48, notes: [60, 64, 67] });
+    expect(chordVoicing('C', 2)!.notes).toEqual([62, 66, 69]);
+  });
+  it('polskie nazwy', () => {
+    expect(polishChordName('Bm')).toBe('Hm');
+    expect(polishChordName('Bb')).toBe('B♭');
+    expect(polishChordName('F#m')).toBe('F♯m');
   });
 });

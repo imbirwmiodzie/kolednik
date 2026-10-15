@@ -1,7 +1,7 @@
 import type { PublicState, SongMeta } from '@kolednik/shared';
 import { SongArt } from '../art/SongArt';
 import { getSocket } from '../net/socket';
-import { hostSettings } from '../settings';
+import { hostSettings, songKeyShift } from '../settings';
 import { JoinCard } from './JoinCard';
 
 /** Ekran główny wieczoru: kafelki kolęd (F1), głosowanie, losowanie, rekordy. */
@@ -19,7 +19,8 @@ export function Lobby({
   const sung = new Set(state.sung);
   const left = songs.filter((s) => !sung.has(s.slug)).length;
   const s = getSocket();
-  const start = (slug: string) => s.emit('host:song:start', { slug, advanceMode: 'auto' });
+  const start = (slug: string) =>
+    s.emit('host:song:start', { slug, advanceMode: 'auto', keyShift: songKeyShift(slug) });
 
   return (
     <div className="lobby">

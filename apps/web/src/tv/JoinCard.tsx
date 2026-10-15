@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import type { PublicState } from '@kolednik/shared';
+import { useJoinInfo } from '../net/socket';
 
 type Info = { publicUrl: string | null; lanAddresses: string[] };
 let infoPromise: Promise<Info> | null = null;
@@ -26,21 +27,29 @@ function useJoinBase(): string {
   return base;
 }
 
-/** Kod QR + kod wieczoru do dołączenia z telefonu (F9). */
+/**
+ * Kod QR + kod wieczoru do dołączenia z telefonu (F9). Link zawiera tajny, losowy klucz wieczoru
+ * (po „#”, więc nie trafia nawet do logów serwera ani Cloudflare); kod do wpisania ręcznie jest
+ * zapasowy i chroniony limitem prób.
+ */
 export function JoinCard({ state, compact = false }: { state: PublicState; compact?: boolean }) {
-  const url = `${useJoinBase()}/j/${state.code}`;
+  const info = useJoinInfo();
+  const base = useJoinBase();
+  const url = info ? `${base}/j#k=${info.token}` : null;
   const [qr, setQr] = useState<string | null>(null);
   useEffect(() => {
-    void QRCode.toDataURL(url, { margin: 1, width: 480, errorCorrectionLevel: 'M' }).then(setQr);
+    if (url) void QRCode.toDataURL(url, { margin: 1, width: 480, errorCorrectionLevel: 'M' }).then(setQr);
   }, [url]);
   const online = state.participants.filter((p) => p.connected);
   return (
-    <div className={`join-card ${compact ? 'compact' : ''}`}>
-      {qr && <img className="qr" src={qr} alt={`Kod QR: ${url}`} />}
+    <div className={`join-card ${compact ? 'compact' : ''}`} data-join-url={url ?? undefined}>
+      {qr ? <img className="qr" src={qr} alt="Kod QR do dołączenia" /> : <div className="qr" />}
       <div className="join-text">
         <div className="join-label">Dołącz telefonem</div>
-        <div className="join-code">{state.code}</div>
-        {!compact && <div className="join-url">{url.replace(/^https?:\/\//, '')}</div>}
+        <div className="join-code" aria-label="Kod wieczoru">
+          {info?.code ?? '······'}
+        </div>
+        {!compact && <div className="join-url">{base.replace(/^https?:\/\//, '')}/j</div>}
         <div className="join-count">
           {online.length === 0 ? 'Nikt jeszcze nie dołączył' : `${online.length} na pokładzie`}
         </div>

@@ -6,22 +6,26 @@
     "hue": 50
   },
   "bpm": 150,
-  "key": "F",
+  "key": "G",
   "stanzas": [
     {
       "type": "verse",
       "lines": [
         {
-          "text": "Dzisiaj w Betlejem, dzisiaj w Betlejem"
+          "text": "Dzisiaj w Betlejem, dzisiaj w Betlejem",
+          "chords": "G D7"
         },
         {
-          "text": "Wesoła nowina,"
+          "text": "Wesoła nowina,",
+          "chords": "D7 G"
         },
         {
-          "text": "Że Panna czysta, że Panna czysta"
+          "text": "Że Panna czysta, że Panna czysta",
+          "chords": "G D7"
         },
         {
-          "text": "Porodziła Syna."
+          "text": "Porodziła Syna.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -33,16 +37,20 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Maryja Panna, Maryja Panna"
+          "text": "Maryja Panna, Maryja Panna",
+          "chords": "G D7"
         },
         {
-          "text": "Dzieciątko piastuje,"
+          "text": "Dzieciątko piastuje,",
+          "chords": "D7 G"
         },
         {
-          "text": "I Józef Święty, i Józef Święty"
+          "text": "I Józef Święty, i Józef Święty",
+          "chords": "G D7"
         },
         {
-          "text": "Ono pielęgnuje."
+          "text": "Ono pielęgnuje.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -54,16 +62,20 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Choć w stajeneczce, choć w stajeneczce"
+          "text": "Choć w stajeneczce, choć w stajeneczce",
+          "chords": "G D7"
         },
         {
-          "text": "Panna Syna rodzi,"
+          "text": "Panna Syna rodzi,",
+          "chords": "D7 G"
         },
         {
-          "text": "Przecież On wkrótce, przecież On wkrótce"
+          "text": "Przecież On wkrótce, przecież On wkrótce",
+          "chords": "G D7"
         },
         {
-          "text": "Ludzi oswobodzi."
+          "text": "Ludzi oswobodzi.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -75,16 +87,20 @@
       "type": "verse",
       "lines": [
         {
-          "text": "I Trzej Królowie, i Trzej Królowie"
+          "text": "I Trzej Królowie, i Trzej Królowie",
+          "chords": "G D7"
         },
         {
-          "text": "Od wschodu przybyli,"
+          "text": "Od wschodu przybyli,",
+          "chords": "D7 G"
         },
         {
-          "text": "I dary Panu, i dary Panu"
+          "text": "I dary Panu, i dary Panu",
+          "chords": "G D7"
         },
         {
-          "text": "Kosztowne złożyli."
+          "text": "Kosztowne złożyli.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -96,16 +112,20 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Pójdźmy też i my, pójdźmy też i my"
+          "text": "Pójdźmy też i my, pójdźmy też i my",
+          "chords": "G D7"
         },
         {
-          "text": "Przywitać Jezusa,"
+          "text": "Przywitać Jezusa,",
+          "chords": "D7 G"
         },
         {
-          "text": "Króla nad królami, Króla nad królami,"
+          "text": "Króla nad królami, Króla nad królami,",
+          "chords": "G D7"
         },
         {
-          "text": "Uwielbić Chrystusa."
+          "text": "Uwielbić Chrystusa.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -118,16 +138,20 @@
     "refren": {
       "lines": [
         {
-          "text": "Chrystus się rodzi, nas oswobodzi,"
+          "text": "Chrystus się rodzi, nas oswobodzi,",
+          "chords": "G D7"
         },
         {
-          "text": "Anieli grają, króle witają,"
+          "text": "Anieli grają, króle witają,",
+          "chords": "D7 G"
         },
         {
-          "text": "Pasterze śpiewają, bydlęta klękają,"
+          "text": "Pasterze śpiewają, bydlęta klękają,",
+          "chords": "C G"
         },
         {
-          "text": "Cuda, cuda ogłaszają."
+          "text": "Cuda, cuda ogłaszają.",
+          "chords": "D7 G"
         }
       ]
     }

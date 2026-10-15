@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { Book, Metrics, RecordInfo, ThemeId } from '@kolednik/shared';
+import type { AdminEvent, AdminStats, Book, Metrics, RecordInfo, ThemeId } from '@kolednik/shared';
 
 const MIGRATIONS = [
   `CREATE TABLE groups (
@@ -33,13 +33,38 @@ const MIGRATIONS = [
    );
    CREATE INDEX performances_group_song ON performances(group_id, song_slug);
    CREATE INDEX performances_session ON performances(session_id);`,
+  // v2: hasła grup, tajny klucz linku dla telefonów, dziennik zdarzeń.
+  `ALTER TABLE groups ADD COLUMN password_hash TEXT;
+   ALTER TABLE sessions ADD COLUMN join_token TEXT;
+   CREATE TABLE events (
+     id INTEGER PRIMARY KEY,
+     at INTEGER NOT NULL,
+     type TEXT NOT NULL,
+     group_id INTEGER,
+     session_id TEXT,
+     ip TEXT,
+     data TEXT
+   );
+   CREATE INDEX events_at ON events(at);
+   CREATE INDEX events_type_at ON events(type, at);`,
 ];
+
+export type GroupRow = { id: number; name_norm: string; display_name: string; password_hash: string | null };
+
+export type EventInput = {
+  type: string;
+  groupId?: number | null;
+  sessionId?: string | null;
+  ip?: string | null;
+  data?: Record<string, unknown>;
+};
 
 export type SessionRow = {
   id: string;
   group_id: number;
   code: string;
   host_token: string;
+  join_token: string | null;
   theme: ThemeId;
   started_at: number;
   display_name: string;
@@ -65,22 +90,41 @@ export class Db {
     }
   }
 
-  upsertGroup(nameNorm: string, displayName: string, now = Date.now()): number {
-    this.db
-      .prepare(
-        `INSERT INTO groups (name_norm, display_name, created_at) VALUES (?, ?, ?)
-         ON CONFLICT(name_norm) DO UPDATE SET display_name = excluded.display_name`,
-      )
-      .run(nameNorm, displayName, now);
-    return (this.db.prepare('SELECT id FROM groups WHERE name_norm = ?').get(nameNorm) as { id: number }).id;
+  getGroup(nameNorm: string): GroupRow | undefined {
+    return this.db
+      .prepare('SELECT id, name_norm, display_name, password_hash FROM groups WHERE name_norm = ?')
+      .get(nameNorm) as GroupRow | undefined;
+  }
+
+  createGroup(nameNorm: string, displayName: string, passwordHash: string, now = Date.now()): number {
+    const r = this.db
+      .prepare('INSERT INTO groups (name_norm, display_name, password_hash, created_at) VALUES (?, ?, ?, ?)')
+      .run(nameNorm, displayName, passwordHash, now);
+    return Number(r.lastInsertRowid);
+  }
+
+  /** Grupy sprzed wprowadzenia haseł dostają hasło przy pierwszym logowaniu. */
+  setGroupPassword(id: number, passwordHash: string) {
+    this.db.prepare('UPDATE groups SET password_hash = ? WHERE id = ?').run(passwordHash, id);
+  }
+
+  setGroupDisplayName(id: number, displayName: string) {
+    this.db.prepare('UPDATE groups SET display_name = ? WHERE id = ?').run(displayName, id);
   }
 
   createSession(s: Omit<SessionRow, 'display_name'>) {
     this.db
       .prepare(
-        'INSERT INTO sessions (id, group_id, code, host_token, theme, started_at) VALUES (?, ?, ?, ?, ?, ?)',
+        `INSERT INTO sessions (id, group_id, code, host_token, join_token, theme, started_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(s.id, s.group_id, s.code, s.host_token, s.theme, s.started_at);
+      .run(s.id, s.group_id, s.code, s.host_token, s.join_token, s.theme, s.started_at);
+  }
+
+  setJoin(sessionId: string, code: string, joinToken: string) {
+    this.db
+      .prepare('UPDATE sessions SET code = ?, join_token = ? WHERE id = ?')
+      .run(code, joinToken, sessionId);
   }
 
   getSession(id: string): SessionRow | undefined {
@@ -163,6 +207,111 @@ export class Db {
       )
       .all(groupId) as Book['evenings'];
     return { groupName, records: records.map((r) => ({ ...r })), evenings: evenings.map((e) => ({ ...e })) };
+  }
+
+  // ───────── Dziennik zdarzeń i statystyki (panel admina) ─────────
+
+  logEvent(e: EventInput, now = Date.now()) {
+    this.db
+      .prepare('INSERT INTO events (at, type, group_id, session_id, ip, data) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(
+        now,
+        e.type,
+        e.groupId ?? null,
+        e.sessionId ?? null,
+        e.ip ?? null,
+        e.data ? JSON.stringify(e.data) : null,
+      );
+  }
+
+  pruneEvents(olderThanMs: number, now = Date.now()) {
+    this.db.prepare('DELETE FROM events WHERE at < ?').run(now - olderThanMs);
+  }
+
+  events(opts: { type?: string; limit: number; before?: number }): AdminEvent[] {
+    const rows = this.db
+      .prepare(
+        `SELECT e.id, e.at, e.type, g.display_name AS "group", e.session_id AS sessionId, e.ip, e.data
+         FROM events e LEFT JOIN groups g ON g.id = e.group_id
+         WHERE (? IS NULL OR e.type = ?) AND (? IS NULL OR e.id < ?)
+         ORDER BY e.id DESC LIMIT ?`,
+      )
+      .all(
+        opts.type ?? null,
+        opts.type ?? null,
+        opts.before ?? null,
+        opts.before ?? null,
+        opts.limit,
+      ) as (Omit<AdminEvent, 'data'> & { data: string | null })[];
+    return rows.map((r) => ({ ...r, data: r.data ? (JSON.parse(r.data) as Record<string, unknown>) : null }));
+  }
+
+  stats(titles: Map<string, string>, now = Date.now()): Omit<AdminStats, 'live'> {
+    const one = <T>(sql: string, ...args: (number | string)[]) => this.db.prepare(sql).get(...args) as T;
+    const week = now - 7 * 86_400_000;
+    const since = now - 30 * 86_400_000;
+    const totals = {
+      groups: one<{ n: number }>('SELECT COUNT(*) AS n FROM groups').n,
+      sessions: one<{ n: number }>('SELECT COUNT(*) AS n FROM sessions').n,
+      performances: one<{ n: number }>('SELECT COUNT(*) AS n FROM performances').n,
+      avgScore: one<{ a: number | null }>('SELECT ROUND(AVG(score)) AS a FROM performances').a,
+      phonesJoined: one<{ n: number }>("SELECT COUNT(*) AS n FROM events WHERE type = 'phone_joined'").n,
+      failedLogins7d: one<{ n: number }>(
+        "SELECT COUNT(*) AS n FROM events WHERE type IN ('login_failed', 'admin_login_failed') AND at >= ?",
+        week,
+      ).n,
+    };
+    const day = (col: string) => `strftime('%Y-%m-%d', ${col} / 1000, 'unixepoch', 'localtime')`;
+    const byDay = (sql: string) =>
+      new Map(
+        (this.db.prepare(sql).all(since) as { day: string; n: number }[]).map((r) => [r.day, r.n] as const),
+      );
+    const sessions = byDay(
+      `SELECT ${day('started_at')} AS day, COUNT(*) AS n FROM sessions WHERE started_at >= ? GROUP BY day`,
+    );
+    const songs = byDay(
+      `SELECT ${day('created_at')} AS day, COUNT(*) AS n FROM performances WHERE created_at >= ? GROUP BY day`,
+    );
+    const joins = byDay(
+      `SELECT ${day('at')} AS day, COUNT(*) AS n FROM events WHERE type = 'phone_joined' AND at >= ? GROUP BY day`,
+    );
+    const daily: AdminStats['daily'] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now - i * 86_400_000);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      daily.push({
+        day: key,
+        sessions: sessions.get(key) ?? 0,
+        songs: songs.get(key) ?? 0,
+        joins: joins.get(key) ?? 0,
+      });
+    }
+    const topSongs = (
+      this.db
+        .prepare(
+          `SELECT song_slug AS slug, COUNT(*) AS times, ROUND(AVG(score)) AS avgScore, MAX(score) AS best
+           FROM performances GROUP BY song_slug ORDER BY times DESC LIMIT 20`,
+        )
+        .all() as Omit<AdminStats['topSongs'][number], 'title'>[]
+    ).map((r) => ({ ...r, title: titles.get(r.slug) ?? r.slug }));
+    const topGroups = this.db
+      .prepare(
+        `SELECT g.display_name AS name, COUNT(DISTINCT s.id) AS sessions, COUNT(p.id) AS songs,
+                MAX(p.score) AS best, MAX(COALESCE(p.created_at, s.started_at)) AS lastAt
+         FROM groups g JOIN sessions s ON s.group_id = g.id LEFT JOIN performances p ON p.session_id = s.id
+         GROUP BY g.id ORDER BY lastAt DESC LIMIT 20`,
+      )
+      .all() as AdminStats['topGroups'];
+    const eventTypes = this.db
+      .prepare('SELECT type, COUNT(*) AS count FROM events WHERE at >= ? GROUP BY type ORDER BY count DESC')
+      .all(week) as AdminStats['eventTypes'];
+    return {
+      totals,
+      daily,
+      topSongs: topSongs.map((r) => ({ ...r })),
+      topGroups: topGroups.map((r) => ({ ...r })),
+      eventTypes: eventTypes.map((r) => ({ ...r })),
+    };
   }
 
   close() {

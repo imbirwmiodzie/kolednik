@@ -4,6 +4,7 @@ import {
   flattenSong,
   lineDurationMs,
   scorePerformance,
+  transposeKey,
   verseCount,
   type AdvanceMode,
   type FlatLine,
@@ -11,12 +12,14 @@ import {
   type PublicState,
   type Song,
 } from '@kolednik/shared';
+import { accompaniment } from '../audio/accompaniment';
 import { mic, useMic } from '../audio/mic';
 import { useSong } from '../net/api';
 import { getSocket, toServerTime } from '../net/socket';
 import { estimateSpeechMs, narrator, promptText } from '../narrator/narrator';
 import { usePlayer, type PlayerPos } from '../lyrics/usePlayer';
-import { hostSettings } from '../settings';
+import { hostSettings, setSongKeyShift, songKeyShift } from '../settings';
+import { ChordDiagram, ChordRow, shiftChords } from '../ui/Chords';
 
 const INTRO_SEC = 3;
 
@@ -50,6 +53,8 @@ function SingSong({
   );
   const [intro, setIntro] = useState(INTRO_SEC);
   const running = intro === 0;
+  const [keyShift, setKeyShift] = useState(() => songKeyShift(song.slug));
+  const beatMs = 60_000 / (song.bpm * settings.tempo);
   const frames = useRef<Frame[]>([]);
   const finished = useRef(false);
 
@@ -62,8 +67,21 @@ function SingSong({
       m.status === 'on' && m.noiseDb !== null && frames.current.length >= 20
         ? scorePerformance(frames.current, m.noiseDb)
         : null;
-    getSocket().emit('host:song:finish', { metrics, tempo: hostSettings.get().tempo });
-  }, []);
+    accompaniment.stop();
+    getSocket().emit('host:song:finish', {
+      metrics,
+      tempo: hostSettings.get().tempo,
+      keyShift: songKeyShift(song.slug),
+    });
+  }, [song.slug]);
+
+  // Zmiana tonacji (F22): zapamiętana dla kolędy, akordy na telefonach też się przesuwają.
+  const changeKey = (delta: number) => {
+    const next = Math.max(-6, Math.min(6, keyShift + delta));
+    setKeyShift(next);
+    setSongKeyShift(song.slug, next);
+    getSocket().emit('host:song:key', { keyShift: next });
+  };
 
   const player = usePlayer({ lines, durations, mode, running, onFinish: finish });
   const { pos } = player;
@@ -88,6 +106,33 @@ function SingSong({
     const t = setTimeout(() => setIntro((i) => i - 1), 1000);
     return () => clearTimeout(t);
   }, [intro, lines]);
+
+  // Podkład (F21): akordy bieżącego wersu grane przez syntezator; pauza i koniec wyciszają.
+  useEffect(() => {
+    if (!settings.accompaniment) return accompaniment.stop();
+    accompaniment.setVolume(settings.accompanimentVolume);
+    if (!running) {
+      const first = lines[0]?.chords[0];
+      if (first && intro === INTRO_SEC - 1) {
+        accompaniment.countIn(first, keyShift, beatMs, settings.instrument);
+      }
+      return;
+    }
+    if (pos.paused) return accompaniment.stop();
+    const line = lines[pos.index];
+    if (!line) return;
+    accompaniment.playLine({
+      chords: line.chords,
+      durationMs: durations[pos.index] ?? 0,
+      beatMs,
+      instrument: settings.instrument,
+      keyShift,
+      offsetMs: Date.now() - pos.startedAt,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, intro, pos, settings.accompaniment, settings.instrument, keyShift]);
+  useEffect(() => accompaniment.setVolume(settings.accompanimentVolume), [settings.accompanimentVolume]);
+  useEffect(() => () => accompaniment.stop(), []);
 
   // Pozycja w tekście → serwer → telefony (F20).
   useEffect(() => {
@@ -220,6 +265,7 @@ function SingSong({
             <span className="chip">⏱️ Auto · tempo {Math.round(settings.tempo * 100)}%</span>
           )}
           {settings.narrator && <span className="chip">🗣️ Narrator</span>}
+          {settings.accompaniment && <span className="chip">🎹 Podkład</span>}
         </div>
         {micState.status === 'on' && (
           <div className="meter" ref={meterRef} title="Kolędometr">
@@ -235,7 +281,25 @@ function SingSong({
           <p className="line line-next">{lines[0]?.text}</p>
         </div>
       ) : (
-        <Lines lines={lines} pos={pos} durations={durations} mode={mode} />
+        <Lines
+          lines={lines}
+          pos={pos}
+          durations={durations}
+          mode={mode}
+          chords={settings.chords ? (l) => shiftChords(l.chords, keyShift, song.key) : null}
+        />
+      )}
+      {settings.chords && settings.chordDiagrams && (
+        <ChordPanel
+          chords={shiftChords(
+            [
+              ...(lines[running ? pos.index : 0]?.chords ?? []),
+              ...(lines[(running ? pos.index : 0) + 1]?.chords ?? []),
+            ],
+            keyShift,
+            song.key,
+          )}
+        />
       )}
 
       <footer className="sing-foot">
@@ -261,10 +325,35 @@ function SingSong({
           <button className="btn btn-small btn-ghost" onClick={() => s.emit('host:song:abort')}>
             ✕ przerwij
           </button>
+          {(settings.accompaniment || settings.chords) && song.key && (
+            <span className="key-ctl" aria-label="Tonacja">
+              Tonacja <strong>{transposeKey(song.key, keyShift)}</strong>
+              {keyShift !== 0 && <small> ({keyShift > 0 ? `+${keyShift}` : keyShift})</small>}
+              <button className="btn btn-small" onClick={() => changeKey(-1)} aria-label="Niżej o pół tonu">
+                ♭
+              </button>
+              <button className="btn btn-small" onClick={() => changeKey(1)} aria-label="Wyżej o pół tonu">
+                ♯
+              </button>
+            </span>
+          )}
           <span className="keys">← → wers · ↑ ↓ zwrotka · spacja pauza · Esc koniec · F pełny ekran</span>
         </div>
       </footer>
     </div>
+  );
+}
+
+/** Chwyty gitarowe akordów bieżącego i następnego wersu (bez powtórzeń). */
+function ChordPanel({ chords }: { chords: string[] }) {
+  const unique = [...new Set(chords)];
+  if (!unique.length) return null;
+  return (
+    <aside className="chord-panel" aria-label="Chwyty gitarowe">
+      {unique.map((c) => (
+        <ChordDiagram key={c} chord={c} />
+      ))}
+    </aside>
   );
 }
 
@@ -273,11 +362,13 @@ function Lines({
   pos,
   durations,
   mode,
+  chords,
 }: {
   lines: FlatLine[];
   pos: PlayerPos;
   durations: number[];
   mode: AdvanceMode;
+  chords: ((l: FlatLine) => string[]) | null;
 }) {
   const cur = lines[pos.index];
   const prev = lines[pos.index - 1];
@@ -292,6 +383,7 @@ function Lines({
         className={`line line-cur ${cur?.part === 'chorus' ? 'is-chorus' : ''}`}
         key={`${pos.index}-${pos.startedAt}`}
       >
+        {chords && cur && <ChordRow chords={chords(cur)} />}
         <span className="line-text">{cur?.text}</span>
         <span
           className={`line-progress ${mode === 'conductor' ? 'is-conductor' : ''}`}
@@ -305,7 +397,10 @@ function Lines({
       {newBlock && (
         <p className="line-divider">{next.part === 'chorus' ? 'refren' : `zwrotka ${next.verse + 1}`}</p>
       )}
-      <p className="line line-next">{next?.text ?? ' '}</p>
+      <p className="line line-next">
+        {chords && next && <ChordRow chords={chords(next)} className="small" />}
+        {next?.text ?? ' '}
+      </p>
       <p className="line line-after">{after?.text ?? ' '}</p>
       {pos.paused && <div className="paused-badge">⏸ Pauza</div>}
     </div>

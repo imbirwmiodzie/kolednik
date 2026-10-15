@@ -1,4 +1,5 @@
 import type { ThemeId } from '@kolednik/shared';
+import type { InstrumentId } from './audio/accompaniment';
 import { createStore } from './storage';
 
 /** Ustawienia gospodarza (TV), pamiętane między uruchomieniami. */
@@ -13,6 +14,26 @@ export const hostSettings = createStore('kolednik:settings', {
   voteDurationSec: 20,
   tempo: 1,
   lastGroupName: '',
+  /** Akordy nad tekstem i chwyty gitarowe (opcjonalne). */
+  chords: false,
+  chordDiagrams: true,
+  // Zaawansowane: podkład muzyczny.
+  accompaniment: false,
+  instrument: 'piano' as InstrumentId,
+  accompanimentVolume: 0.6,
+  /** Zmiana tonacji (półtony) zapamiętana dla każdej kolędy osobno (F24). */
+  keyBySong: {} as Record<string, number>,
 });
 
 export type HostSettings = ReturnType<typeof hostSettings.get>;
+
+export function songKeyShift(slug: string): number {
+  return hostSettings.get().keyBySong[slug] ?? 0;
+}
+
+export function setSongKeyShift(slug: string, keyShift: number) {
+  hostSettings.set({ keyBySong: { ...hostSettings.get().keyBySong, [slug]: keyShift } });
+}
+
+/** Samouczek pokazujemy przy pierwszym uruchomieniu. */
+export const tutorialState = createStore('kolednik:tutorial', { done: false });

@@ -2,7 +2,7 @@
 
 Aplikacja „karaoke do kolęd” na spotkania świąteczne. Uruchamiana na PC podłączonym do telewizora, uczestnicy biorą udział przez swoje smartfony.
 
-Status: **szkic wymagań** (wersja 0.4 — wszystkie pytania otwarte rozstrzygnięte). Implementacja jeszcze nie rozpoczęta.
+Status: **szkic wymagań** (wersja 0.5 — samouczek, akordy, podkład, hasła, bezpieczny QR, statystyki). Implementacja jeszcze nie rozpoczęta.
 
 ---
 
@@ -98,6 +98,16 @@ Status: **szkic wymagań** (wersja 0.4 — wszystkie pytania otwarte rozstrzygni
 - **F41.** Rekordy i historia są widoczne **tylko dla własnej grupy** (brak publicznego rankingu).
 - **F42.** Uczestnicy dołączający z telefonu nie zakładają konta — opcjonalnie podają ksywkę (np. do wyboru dyrygenta).
 
+### 3.10 Dodane w wersji 0.5
+- **F43. Samouczek** przy pierwszym otwarciu, w formie kreatora krok po kroku; można go przerwać w każdej chwili
+  i otworzyć ponownie.
+- **F44. Podkład muzyczny z różnymi instrumentami** (pianino, gitara, organy, smyczki, pozytywka, dzwonki) —
+  wybór instrumentu tylko w ustawieniach zaawansowanych.
+- **F45. Akordy na gitarę** — opcjonalnie, nad tekstem i jako diagramy chwytów; przesuwają się ze zmianą tonacji.
+- **F46. Konto grupy z hasłem** — nowa grupa podaje nazwę i hasło; istniejąca loguje się tym hasłem (zastępuje F40).
+- **F47. Link w kodzie QR zabezpieczony** losowym kluczem wieczoru danej rodziny; możliwość wygenerowania nowego.
+- **F48. Statystyki i dziennik zdarzeń** na serwerze, na osobnej stronie z loginem i hasłem.
+
 ## 4. Wymagania niefunkcjonalne
 
 - **N1. Czytelność na TV:** duże fonty, wysoki kontrast, układ 16:9, brak drobnych elementów sterujących na ekranie śpiewania.
@@ -106,6 +116,8 @@ Status: **szkic wymagań** (wersja 0.4 — wszystkie pytania otwarte rozstrzygni
 - **N4. Prywatność:** dźwięk z mikrofonu analizowany lokalnie w przeglądarce, **nie jest nagrywany ani wysyłany** na serwer — na serwer trafiają tylko wyniki liczbowe.
 - **N5. Hosting:** adres **https://kolednik.505844.xyz**, serwer własny na **Oracle Cloud**, ruch przez **reverse proxy Cloudflare**. HTTPS wymagany (m.in. do dostępu do mikrofonu i połączeń WebSocket z telefonów); serwer obsługuje wiele równoległych sesji różnych grup.
 - **N6. Prostota startu:** od otwarcia strony do pierwszej kolędy — maks. kilka kliknięć.
+- **N8. Bezpieczeństwo:** hasła jako skrót scrypt, limity nieudanych prób (hasło, kod, panel), tajny klucz w linku QR,
+  ciasteczko panelu HttpOnly + SameSite, IP w logach maskowane.
 - **N7. Odporność na zerwanie połączenia:** telefon, który stracił połączenie, automatycznie wraca do sesji; chwilowy brak internetu nie przerywa śpiewania na TV.
 
 ## 5. Uwagi techniczne (wstępne, do decyzji)

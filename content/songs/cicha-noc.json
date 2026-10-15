@@ -6,28 +6,34 @@
     "hue": 250
   },
   "bpm": 75,
-  "key": "B",
+  "key": "C",
   "stanzas": [
     {
       "type": "verse",
       "lines": [
         {
-          "text": "Cicha noc, święta noc,"
+          "text": "Cicha noc, święta noc,",
+          "chords": "C"
         },
         {
-          "text": "Pokój niesie ludziom wszem,"
+          "text": "Pokój niesie ludziom wszem,",
+          "chords": "G7 C"
         },
         {
-          "text": "A u żłóbka Matka Święta"
+          "text": "A u żłóbka Matka Święta",
+          "chords": "F C"
         },
         {
-          "text": "Czuwa sama uśmiechnięta"
+          "text": "Czuwa sama uśmiechnięta",
+          "chords": "F C"
         },
         {
-          "text": "Nad Dzieciątka snem,"
+          "text": "Nad Dzieciątka snem,",
+          "chords": "G7 C"
         },
         {
-          "text": "Nad Dzieciątka snem."
+          "text": "Nad Dzieciątka snem.",
+          "chords": "C G7 C"
         }
       ]
     },
@@ -35,22 +41,28 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Cicha noc, święta noc,"
+          "text": "Cicha noc, święta noc,",
+          "chords": "C"
         },
         {
-          "text": "Pastuszkowie od swych trzód"
+          "text": "Pastuszkowie od swych trzód",
+          "chords": "G7 C"
         },
         {
-          "text": "Biegną wielce zadziwieni"
+          "text": "Biegną wielce zadziwieni",
+          "chords": "F C"
         },
         {
-          "text": "Za anielskim głosem pieni,"
+          "text": "Za anielskim głosem pieni,",
+          "chords": "F C"
         },
         {
-          "text": "Gdzie się spełnił cud,"
+          "text": "Gdzie się spełnił cud,",
+          "chords": "G7 C"
         },
         {
-          "text": "Gdzie się spełnił cud."
+          "text": "Gdzie się spełnił cud.",
+          "chords": "C G7 C"
         }
       ]
     },
@@ -58,22 +70,28 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Cicha noc, święta noc,"
+          "text": "Cicha noc, święta noc,",
+          "chords": "C"
         },
         {
-          "text": "Narodzony Boży Syn,"
+          "text": "Narodzony Boży Syn,",
+          "chords": "G7 C"
         },
         {
-          "text": "Pan wielkiego majestatu"
+          "text": "Pan wielkiego majestatu",
+          "chords": "F C"
         },
         {
-          "text": "Niesie dziś całemu światu"
+          "text": "Niesie dziś całemu światu",
+          "chords": "F C"
         },
         {
-          "text": "Odkupienie win,"
+          "text": "Odkupienie win,",
+          "chords": "G7 C"
         },
         {
-          "text": "Odkupienie win."
+          "text": "Odkupienie win.",
+          "chords": "C G7 C"
         }
       ]
     }

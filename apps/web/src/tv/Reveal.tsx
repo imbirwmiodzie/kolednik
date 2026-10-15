@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Reveal as RevealT, SongMeta } from '@kolednik/shared';
 import { SongArt } from '../art/SongArt';
 import { getSocket } from '../net/socket';
+import { songKeyShift } from '../settings';
 
 export const SPIN_MS = 4200;
 
@@ -36,7 +37,11 @@ export function Reveal({ reveal, bySlug }: { reveal: RevealT; bySlug: Map<string
     if (count === 0) {
       if (!started.current) {
         started.current = true;
-        getSocket().emit('host:song:start', { slug: reveal.slug, advanceMode: 'auto' });
+        getSocket().emit('host:song:start', {
+          slug: reveal.slug,
+          advanceMode: 'auto',
+          keyShift: songKeyShift(reveal.slug),
+        });
       }
       return;
     }

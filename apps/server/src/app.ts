@@ -4,6 +4,7 @@ import path from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import { Server } from 'socket.io';
+import { adminCredentials, registerAdmin, type AdminCredentials } from './admin/admin.js';
 import type { Config } from './config.js';
 import { Db } from './db/db.js';
 import { Hub, type IO } from './sessions/hub.js';
@@ -11,7 +12,7 @@ import { SongLibrary } from './songs/library.js';
 
 export async function buildApp(
   config: Config,
-  opts: { dbFile?: string; logger?: boolean; logLevel?: string } = {},
+  opts: { dbFile?: string; logger?: boolean; logLevel?: string; admin?: AdminCredentials } = {},
 ) {
   const library = SongLibrary.load(config.contentDir);
   const db = new Db(opts.dbFile ?? path.join(config.dataDir, 'kolednik.sqlite'));
@@ -64,6 +65,9 @@ export async function buildApp(
     cors: { origin: false },
   });
   const hub = new Hub(io, db, library);
+  registerAdmin(app, { db, hub, library, credentials: opts.admin ?? adminCredentials() });
+  // Dziennik zdarzeń trzymamy pół roku.
+  db.pruneEvents(183 * 86_400_000);
 
   app.addHook('onClose', async () => {
     hub.close();

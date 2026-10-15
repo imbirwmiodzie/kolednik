@@ -1,3 +1,4 @@
+import { adminCredentials } from './admin/admin.js';
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 
@@ -10,6 +11,12 @@ async function main() {
   console.log(
     `Kolędnik działa na porcie ${config.port}: ${library.slugs.length} kolęd, dane w ${config.dataDir}`,
   );
+
+  if (adminCredentials().isDefault) {
+    console.warn(
+      'Uwaga: panel /admin używa domyślnego hasła — ustaw ADMIN_USER i ADMIN_PASSWORD na serwerze.',
+    );
+  }
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.on(signal, () => {

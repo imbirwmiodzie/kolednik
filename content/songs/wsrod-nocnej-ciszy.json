@@ -6,25 +6,30 @@
     "hue": 225
   },
   "bpm": 120,
-  "key": "F",
+  "key": "C",
   "stanzas": [
     {
       "type": "verse",
       "lines": [
         {
-          "text": "Wśród nocnej ciszy głos się rozchodzi:"
+          "text": "Wśród nocnej ciszy głos się rozchodzi:",
+          "chords": "C G7 C"
         },
         {
-          "text": "Wstańcie, pasterze, Bóg się wam rodzi!"
+          "text": "Wstańcie, pasterze, Bóg się wam rodzi!",
+          "chords": "C G7 C"
         },
         {
-          "text": "Czym prędzej się wybierajcie,"
+          "text": "Czym prędzej się wybierajcie,",
+          "chords": "F C"
         },
         {
-          "text": "Do Betlejem pospieszajcie"
+          "text": "Do Betlejem pospieszajcie",
+          "chords": "G7 C"
         },
         {
-          "text": "Przywitać Pana."
+          "text": "Przywitać Pana.",
+          "chords": "G7 C"
         }
       ]
     },
@@ -32,19 +37,24 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Poszli, znaleźli Dzieciątko w żłobie"
+          "text": "Poszli, znaleźli Dzieciątko w żłobie",
+          "chords": "C G7 C"
         },
         {
-          "text": "Z wszystkimi znaki danymi sobie."
+          "text": "Z wszystkimi znaki danymi sobie.",
+          "chords": "C G7 C"
         },
         {
-          "text": "Jako Bogu cześć Mu dali,"
+          "text": "Jako Bogu cześć Mu dali,",
+          "chords": "F C"
         },
         {
-          "text": "A witając zawołali"
+          "text": "A witając zawołali",
+          "chords": "G7 C"
         },
         {
-          "text": "Z wielkiej radości:"
+          "text": "Z wielkiej radości:",
+          "chords": "G7 C"
         }
       ]
     },
@@ -52,19 +62,24 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Ach, witaj, Zbawco, z dawna żądany,"
+          "text": "Ach, witaj, Zbawco, z dawna żądany,",
+          "chords": "C G7 C"
         },
         {
-          "text": "Wiele tysięcy lat wyglądany!"
+          "text": "Wiele tysięcy lat wyglądany!",
+          "chords": "C G7 C"
         },
         {
-          "text": "Na Ciebie króle, prorocy"
+          "text": "Na Ciebie króle, prorocy",
+          "chords": "F C"
         },
         {
-          "text": "Czekali, a Tyś tej nocy"
+          "text": "Czekali, a Tyś tej nocy",
+          "chords": "G7 C"
         },
         {
-          "text": "Nam się objawił."
+          "text": "Nam się objawił.",
+          "chords": "G7 C"
         }
       ]
     },
@@ -72,19 +87,24 @@
       "type": "verse",
       "lines": [
         {
-          "text": "I my czekamy na Ciebie, Pana,"
+          "text": "I my czekamy na Ciebie, Pana,",
+          "chords": "C G7 C"
         },
         {
-          "text": "A skoro przyjdziesz na głos kapłana,"
+          "text": "A skoro przyjdziesz na głos kapłana,",
+          "chords": "C G7 C"
         },
         {
-          "text": "Padniemy na twarz przed Tobą,"
+          "text": "Padniemy na twarz przed Tobą,",
+          "chords": "F C"
         },
         {
-          "text": "Wierząc, żeś jest pod osobą"
+          "text": "Wierząc, żeś jest pod osobą",
+          "chords": "G7 C"
         },
         {
-          "text": "Chleba i wina."
+          "text": "Chleba i wina.",
+          "chords": "G7 C"
         }
       ]
     }

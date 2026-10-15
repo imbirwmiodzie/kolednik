@@ -20,7 +20,8 @@ export class Session {
   sung: string[];
   vote: { endsAt: number; ballots: Map<string, string> } | null = null;
   reveal: Reveal | null = null;
-  song: { slug: string; advanceMode: AdvanceMode; position: LinePosition | null } | null = null;
+  song: { slug: string; advanceMode: AdvanceMode; keyShift: number; position: LinePosition | null } | null =
+    null;
   conductorId: string | null = null;
   summary: Summary | null = null;
   lastActivity = Date.now();
@@ -31,6 +32,8 @@ export class Session {
     readonly groupId: number,
     readonly groupName: string,
     readonly hostToken: string,
+    /** Tajny klucz w linku z kodu QR. */
+    public joinToken: string,
     public theme: ThemeId,
     sung: string[],
     private readonly allSlugs: () => string[],
@@ -107,12 +110,12 @@ export class Session {
     return true;
   }
 
-  startSong(slug: string, advanceMode: AdvanceMode): boolean {
+  startSong(slug: string, advanceMode: AdvanceMode, keyShift = 0): boolean {
     if (this.phase === 'SINGING') return false;
     this.vote = null;
     this.reveal = null;
     this.summary = null;
-    this.song = { slug, advanceMode, position: null };
+    this.song = { slug, advanceMode, keyShift, position: null };
     this.phase = 'SINGING';
     return true;
   }
@@ -120,6 +123,12 @@ export class Session {
   setPosition(pos: LinePosition): boolean {
     if (this.phase !== 'SINGING' || !this.song) return false;
     this.song.position = pos;
+    return true;
+  }
+
+  setKey(keyShift: number): boolean {
+    if (!this.song) return false;
+    this.song.keyShift = keyShift;
     return true;
   }
 
@@ -181,7 +190,6 @@ export class Session {
     const conductor = this.conductorId ? this.participants.get(this.conductorId) : undefined;
     return {
       sessionId: this.id,
-      code: this.code,
       groupName: this.groupName,
       theme: this.theme,
       phase: this.phase,

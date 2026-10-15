@@ -8,10 +8,12 @@ telefonami, narrator podpowiada następny wers, a kolędometr ocenia, jak głoś
 
 ## Jak się tym bawić
 
-1. Na PC przy telewizorze otwórz stronę, wpisz nazwę grupy (np. „Rodzina Kowalskich”) — to wasze „konto”
-   z rekordami — i wybierz motyw.
-2. Kliknij **Włącz mikrofon** i chwilę bądźcie cicho (pomiar szumu w pokoju).
-3. Goście skanują kod QR z telewizora (albo wchodzą na `/j` i wpisują 4-literowy kod).
+1. Na PC przy telewizorze otwórz stronę. Za pierwszym razem pojawi się **samouczek** (można go przerwać
+   w każdej chwili przyciskiem „Pomiń” albo Esc; wraca pod „Jak to działa?”).
+2. Wpisz **nazwę grupy i hasło** (np. „Rodzina Kowalskich”). Nowa nazwa zakłada konto z tym hasłem, istniejąca
+   wymaga zgodnego hasła. Wybierz motyw, kliknij **Włącz mikrofon** i chwilę bądźcie cicho (pomiar szumu).
+3. Goście skanują kod QR z telewizora — link zawiera tajny klucz tego wieczoru (albo wchodzą na `/j`
+   i wpisują 6-literowy kod z ekranu).
 4. **Głosujemy** — telefony pokazują wszystkie jeszcze niezaśpiewane kolędy, wyniki lecą na żywo na TV.
    Remis albo brak głosów rozstrzyga ruletka. Jest też **Losuj** i klik w kafelek.
 5. Śpiewacie: tekst przewija się sam (tempo w Ustawieniach) albo prowadzi go **dyrygent** — każdy może
@@ -23,6 +25,35 @@ Sterowanie na TV: `←/→` wers, `↑/↓` zwrotka, `spacja` pauza, `Esc` konie
 (działa też pilot/prezenter z `PageUp/PageDown`).
 
 > Narrator potrzebuje polskiego głosu w przeglądarce — najlepiej Chrome lub Edge na Windows.
+
+### Akordy i podkład
+
+- **Akordy na gitarę** (Ustawienia → Akordy): nazwy akordów nad tekstem i diagramy chwytów obok. Na telefonie
+  każdy włącza je sam przyciskiem 🎸.
+- **Podkład** (Ustawienia → Zaawansowane): generowany na żywo w przeglądarce z akordów kolędy — pianino, gitara,
+  organy, smyczki, pozytywka albo dzwonki. Tonację zmieniacie w trakcie kolędy przyciskami ♭/♯ (±6 półtonów);
+  zapamiętuje się dla każdej kolędy, a akordy na TV i telefonach przesuwają się razem z nią.
+- Podkład z głośników słychać w mikrofonie, więc kolędometr może wtedy zawyżać wynik.
+
+### Bezpieczeństwo
+
+- Konto grupy = nazwa + hasło; hasła trzymane jako skrót **scrypt** (z solą), nigdy jawnie.
+- Po 8 złych hasłach dla grupy (albo 30 z jednego adresu) logowanie jest blokowane na 15 minut.
+- Link w kodzie QR ma losowy klucz 144-bitowy po `#`, więc nie trafia do logów serwera ani Cloudflare; telefon
+  usuwa go z paska adresu po dołączeniu. Kod do ręcznego wpisania ma 6 liter (~113 mln kombinacji), a po
+  20 błędnych próbach z jednego adresu wpisywanie jest blokowane na 10 minut.
+- **Nowy kod i link** (Ustawienia) unieważnia stary — dołączeni goście zostają. Kod i klucz zna tylko TV.
+- Telefon po zerwaniu połączenia wraca jako znany uczestnik (losowy identyfikator w pamięci telefonu).
+
+### Panel statystyk `/admin`
+
+Osobna strona z logowaniem: na żywo (wieczory, telewizory, telefony online), sumy, wykresy z 30 dni, najczęściej
+śpiewane kolędy, grupy i **dziennik zdarzeń** (nowe konta, wieczory, dołączenia, głosowania, kolędy, złe hasła,
+blokady…). Adresy IP zapisywane są bez ostatniego członu (np. `83.12.44.x`); dziennik trzymany jest pół roku.
+Zdarzenia lecą też na standardowe wyjście serwera (`docker compose logs`).
+
+Login i hasło ustawiają zmienne `ADMIN_USER` / `ADMIN_PASSWORD` (lokalnie domyślnie `lama` / `bezdomna`;
+w Dockerze hasło trzeba podać w `deploy/.env` — wzór w `deploy/.env.example`).
 
 ## Test na własnym Macu (localhost)
 
@@ -83,7 +114,8 @@ Cloudflare. Baza SQLite leży w wolumenie `/data`.
 
 ```sh
 git clone https://github.com/imbirwmiodzie/kolednik.git && cd kolednik/deploy
-KOLEDNIK_PORT=3000 docker compose up -d --build     # albo `docker compose pull`, gdy obraz jest w GHCR
+cp .env.example .env    # i ustaw własne ADMIN_PASSWORD
+docker compose up -d --build     # albo `docker compose pull`, gdy obraz jest w GHCR
 curl http://127.0.0.1:3000/healthz
 ```
 
@@ -135,6 +167,7 @@ Teksty zostały spisane z pamięci (bez dostępu do źródeł), z pominięciem z
 Przed świętami warto je porównać ze śpiewnikiem:
 
 - **Wszystkie** — interpunkcja i drobne warianty (różne śpiewniki różnią się słowami).
+- **Akordy** — też z pamięci, uproszczone (głównie T–S–D w wygodnych tonacjach); warto sprawdzić z gitarą.
 - `w-zlobie-lezy` — 3. zwrotka, zwłaszcza wers „Naprzód tedy niech tak wszędy”.
 - `przybiezeli-do-betlejem` — kolejność zwrotek; brakuje m.in. zwrotki o wole i ośle.
 - `gdy-sie-chrystus-rodzi` — brakuje 5. zwrotki („A gdy pastuszkowie wszystko zrozumieli…”).

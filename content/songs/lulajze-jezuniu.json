@@ -12,10 +12,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Lulajże, Jezuniu, moja perełko,"
+          "text": "Lulajże, Jezuniu, moja perełko,",
+          "chords": "G D7"
         },
         {
-          "text": "Lulaj, ulubione me pieścidełko."
+          "text": "Lulaj, ulubione me pieścidełko.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -27,10 +29,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Zamknijże znużone płaczem powieczki,"
+          "text": "Zamknijże znużone płaczem powieczki,",
+          "chords": "G D7"
         },
         {
-          "text": "Utulże zemdlone łkaniem usteczki."
+          "text": "Utulże zemdlone łkaniem usteczki.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -42,10 +46,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Lulajże, piękniuchny nasz aniołeczku,"
+          "text": "Lulajże, piękniuchny nasz aniołeczku,",
+          "chords": "G D7"
         },
         {
-          "text": "Lulajże, wdzięczniuchny świata kwiateczku."
+          "text": "Lulajże, wdzięczniuchny świata kwiateczku.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -57,10 +63,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Lulajże, różyczko najozdobniejsza,"
+          "text": "Lulajże, różyczko najozdobniejsza,",
+          "chords": "G D7"
         },
         {
-          "text": "Lulajże, lilijko najprzyjemniejsza."
+          "text": "Lulajże, lilijko najprzyjemniejsza.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -72,10 +80,12 @@
       "type": "verse",
       "lines": [
         {
-          "text": "Lulajże, przyjemna oczom gwiazdeczko,"
+          "text": "Lulajże, przyjemna oczom gwiazdeczko,",
+          "chords": "G D7"
         },
         {
-          "text": "Lulaj, najśliczniejsze świata słoneczko."
+          "text": "Lulaj, najśliczniejsze świata słoneczko.",
+          "chords": "D7 G"
         }
       ]
     },
@@ -88,10 +98,12 @@
     "refren": {
       "lines": [
         {
-          "text": "Lulajże, Jezuniu, lulajże, lulaj!"
+          "text": "Lulajże, Jezuniu, lulajże, lulaj!",
+          "chords": "G C"
         },
         {
-          "text": "A Ty Go, Matulu, w płaczu utulaj."
+          "text": "A Ty Go, Matulu, w płaczu utulaj.",
+          "chords": "D7 G"
         }
       ]
     }
