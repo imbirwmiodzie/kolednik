@@ -24,6 +24,32 @@ Sterowanie na TV: `←/→` wers, `↑/↓` zwrotka, `spacja` pauza, `Esc` konie
 
 > Narrator potrzebuje polskiego głosu w przeglądarce — najlepiej Chrome lub Edge na Windows.
 
+## Test na własnym Macu (localhost)
+
+Potrzebny tylko **Node.js 22.13+** (`brew install node` albo instalator LTS z https://nodejs.org).
+
+```sh
+git clone https://github.com/imbirwmiodzie/kolednik.git
+cd kolednik
+git checkout claude/zealous-turing-1s05ac   # dopóki zmiany nie są w main
+./kolednik-mac.command                      # albo dwuklik w Finderze
+```
+
+Skrypt sam instaluje zależności, buduje aplikację (tylko gdy coś się zmieniło), startuje serwer na porcie
+3000 i otwiera Chrome na `http://localhost:3000`. Inny port: `PORT=4000 ./kolednik-mac.command`.
+Zatrzymanie: `Ctrl+C`. Rekordy lądują w katalogu `data/` (usuń go, żeby zacząć od zera).
+
+- **Telefony** w tym samym Wi-Fi: zeskanujcie kod QR — na localhost kod sam wskazuje adres Maca w sieci
+  (np. `http://192.168.1.23:3000/j/ABCD`). Przy pierwszym starcie macOS zapyta, czy pozwolić `node` na
+  połączenia przychodzące — kliknij **Pozwól**.
+- **Bez telefonów:** otwórz kilka kart `http://localhost:3000/j?gosc=1`, `?gosc=2`, … — każda karta to
+  osobny gość (głosowanie, dyrygent).
+- **Mikrofon:** Chrome zapyta o zgodę; jeśli nie zapyta, sprawdź *Ustawienia systemowe → Prywatność
+  i ochrona → Mikrofon → Google Chrome*.
+- **Narrator:** Chrome na Macu ma głos „Google polski”. W Safari używany jest systemowy głos „Zosia” —
+  gdy go brak, pobierz go w *Ustawienia systemowe → Dostępność → Treść mówiona → Głos systemowy*.
+- Telewizor przez HDMI/AirPlay: przeciągnij okno na ekran TV i naciśnij `F` (pełny ekran).
+
 ## Rozwój
 
 Wymagany Node.js ≥ 22.13 i pnpm (`corepack enable`).

@@ -12,7 +12,13 @@ import { ScoreBlock } from '../tv/Summary';
 import { useCountdown } from '../tv/Voting';
 import { blockLabel } from '../tv/Sing';
 
-const phone = createStore('kolednik:phone', { clientId: '', nick: '', fontScale: 1 });
+// `?gosc=2` w adresie = osobny gość w tej karcie — do testów kilku „telefonów” na jednym komputerze.
+const guest = new URLSearchParams(location.search).get('gosc');
+const phone = createStore(guest ? `kolednik:phone:${guest}` : 'kolednik:phone', {
+  clientId: '',
+  nick: '',
+  fontScale: 1,
+});
 if (!phone.get().clientId) phone.set({ clientId: randomId() });
 
 export function PhoneApp({ code: urlCode }: { code: string | undefined }) {
@@ -57,7 +63,7 @@ export function PhoneApp({ code: urlCode }: { code: string | undefined }) {
     getSocket().emit('phone:join', { code: c, clientId: settings.clientId, nick: settings.nick }, (r) => {
       if (!r.ok) return setError(r.error);
       setJoinedCode(c);
-      if (urlCode !== c) navigate(`/j/${c}`, true);
+      if (urlCode !== c) navigate(`/j/${c}${location.search}`, true);
     });
   };
 

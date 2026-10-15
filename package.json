@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "local": "./kolednik-mac.command"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

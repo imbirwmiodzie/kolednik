@@ -110,3 +110,18 @@ test('tryb automatyczny przewija wersy sam', async ({ page: tv }) => {
   await tv.keyboard.press('Escape');
   await expect(tv.getByText('Mikrofon był wyłączony')).toBeVisible();
 });
+
+test('kilku gości w kartach jednej przeglądarki (?gosc=…)', async ({ page: tv, context }) => {
+  await tv.goto('/');
+  await tv.getByLabel('Kto dziś kolęduje?').fill(`Goście ${Date.now()}`);
+  await tv.getByRole('button', { name: 'Zaczynamy wieczór' }).click();
+  await tv.getByRole('button', { name: 'Bez mikrofonu' }).click();
+  const code = (await tv.locator('.join-code').textContent())!.trim();
+  for (const g of ['1', '2', '3']) {
+    const p = await context.newPage();
+    await p.goto(`/j/${code}?gosc=${g}`);
+    await expect(p.getByText('Jesteś w środku!')).toBeVisible();
+    await expect(p).toHaveURL(new RegExp(`gosc=${g}`));
+  }
+  await expect(tv.getByText('3 na pokładzie')).toBeVisible();
+});

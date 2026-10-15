@@ -3,10 +3,13 @@ import { loadConfig } from './config.js';
 
 async function main() {
   const config = loadConfig();
-  const { app, library } = await buildApp(config, { logger: true });
+  // Tylko ostrzeżenia i błędy — zwykłe komunikaty wypisujemy po ludzku poniżej.
+  const { app, library } = await buildApp(config, { logger: true, logLevel: 'warn' });
 
   await app.listen({ port: config.port, host: config.host });
-  app.log.info(`Kolędnik: ${library.slugs.length} kolęd, dane w ${config.dataDir}`);
+  console.log(
+    `Kolędnik działa na porcie ${config.port}: ${library.slugs.length} kolęd, dane w ${config.dataDir}`,
+  );
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.on(signal, () => {

@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
 import path from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
@@ -8,13 +9,25 @@ import { Db } from './db/db.js';
 import { Hub, type IO } from './sessions/hub.js';
 import { SongLibrary } from './songs/library.js';
 
-export async function buildApp(config: Config, opts: { dbFile?: string; logger?: boolean } = {}) {
+export async function buildApp(
+  config: Config,
+  opts: { dbFile?: string; logger?: boolean; logLevel?: string } = {},
+) {
   const library = SongLibrary.load(config.contentDir);
   const db = new Db(opts.dbFile ?? path.join(config.dataDir, 'kolednik.sqlite'));
-  const app = Fastify({ logger: opts.logger ?? false, trustProxy: true, disableRequestLogging: true });
+  const app = Fastify({
+    logger: opts.logger ? { level: opts.logLevel ?? 'info' } : false,
+    trustProxy: true,
+    disableRequestLogging: true,
+  });
 
   app.get('/healthz', async () => ({ ok: true, songs: library.slugs.length }));
   app.get('/api/songs', async () => library.meta());
+  // Adres, pod którym telefony znajdą serwer — potrzebny, gdy TV otwiera stronę przez localhost.
+  app.get('/api/info', async () => ({
+    publicUrl: process.env.PUBLIC_URL ?? null,
+    lanAddresses: lanAddresses(),
+  }));
   app.get<{ Params: { slug: string } }>('/api/songs/:slug', async (req, reply) => {
     const song = library.get(req.params.slug);
     return song ?? reply.code(404).send({ error: 'Nie ma takiej kolędy' });
@@ -59,4 +72,25 @@ export async function buildApp(config: Config, opts: { dbFile?: string; logger?:
   });
 
   return { app, io, hub, db, library };
+}
+
+const isPrivate = (ip: string) => /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ip);
+
+/** Adresy IPv4 w sieci lokalnej; najpierw typowe Wi-Fi/Ethernet (en0, eth0, wlan0), bez mostków Dockera. */
+export function lanAddresses(): string[] {
+  const out: { name: string; ip: string }[] = [];
+  for (const [name, list] of Object.entries(networkInterfaces())) {
+    for (const a of list ?? []) {
+      if (
+        a.family === 'IPv4' &&
+        !a.internal &&
+        isPrivate(a.address) &&
+        !/^(docker|br-|veth|utun|bridge)/.test(name)
+      ) {
+        out.push({ name, ip: a.address });
+      }
+    }
+  }
+  const rank = (n: string) => (/^(en0|eth0|wlan0|wlp)/.test(n) ? 0 : 1);
+  return out.sort((a, b) => rank(a.name) - rank(b.name)).map((a) => a.ip);
 }
