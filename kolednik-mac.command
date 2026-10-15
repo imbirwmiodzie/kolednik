@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kolędnik — uruchomienie na własnym komputerze (macOS; działa też na Linuksie).
+# Kolędnik — uruchomienie na własnym komputerze (macOS i Linux, np. Ubuntu).
 # W Finderze: dwuklik. W Terminalu: ./kolednik-mac.command   (inny port: PORT=4000 ./kolednik-mac.command)
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -11,11 +11,17 @@ say() { printf '\n\033[1;33m✦ %s\033[0m\n' "$*"; }
 fail() { printf '\n\033[1;31m✗ %s\033[0m\n' "$*"; read -r -p "Naciśnij Enter, żeby zamknąć…" _ || true; exit 1; }
 
 # 1. Node.js ≥ 22.13 (wbudowany SQLite).
+if [ "$(uname)" = Darwin ]; then
+  NODE_HINT="brew install node   (albo pobierz z https://nodejs.org — wersja LTS)"
+else
+  NODE_HINT="curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs
+   (Ubuntu ma w apt za starego Node'a — najpierw: sudo apt remove nodejs libnode-dev; albo użyj nvm: nvm install 22)"
+fi
 if ! command -v node >/dev/null 2>&1; then
-  fail "Brak Node.js. Zainstaluj:  brew install node   (albo pobierz z https://nodejs.org — wersja LTS)"
+  fail "Brak Node.js. Zainstaluj:  ${NODE_HINT}"
 fi
 NODE_OK=$(node -e 'const [a,b]=process.versions.node.split(".").map(Number); console.log(a>22||(a===22&&b>=13)?1:0)')
-[ "$NODE_OK" = 1 ] || fail "Za stary Node.js ($(node -v)). Potrzebny 22.13 lub nowszy:  brew upgrade node"
+[ "$NODE_OK" = 1 ] || fail "Za stary Node.js ($(node -v)). Potrzebny 22.13 lub nowszy:  ${NODE_HINT}"
 
 # 2. pnpm — z systemu, a jak go nie ma, przez npx (bez instalowania czegokolwiek globalnie).
 if command -v pnpm >/dev/null 2>&1; then PNPM=(pnpm); else PNPM=(npx --yes "pnpm@${PNPM_VERSION}"); fi
@@ -50,8 +56,12 @@ echo "   Zatrzymanie: Ctrl+C"
 (
   for _ in $(seq 1 50); do
     if curl -fs "http://localhost:${PORT}/healthz" >/dev/null 2>&1; then
-      if command -v open >/dev/null 2>&1; then
+      if [ "$(uname)" = Darwin ]; then
         open -a "Google Chrome" "http://localhost:${PORT}" 2>/dev/null || open "http://localhost:${PORT}"
+      elif command -v google-chrome >/dev/null 2>&1; then
+        google-chrome "http://localhost:${PORT}" >/dev/null 2>&1 &
+      elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "http://localhost:${PORT}" >/dev/null 2>&1 || true
       fi
       exit 0
     fi

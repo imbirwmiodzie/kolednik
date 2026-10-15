@@ -67,9 +67,18 @@ Zdarzenia lecą też na standardowe wyjście serwera (`docker compose logs`).
 Login i hasło ustawiają zmienne `ADMIN_USER` / `ADMIN_PASSWORD` (lokalnie domyślnie `lama` / `bezdomna`;
 w Dockerze hasło trzeba podać w `deploy/.env` — wzór w `deploy/.env.example`).
 
-## Test na własnym Macu (localhost)
+## Test na własnym Macu lub Ubuntu (localhost)
 
 Potrzebny tylko **Node.js 22.13+** (`brew install node` albo instalator LTS z https://nodejs.org).
+Na Ubuntu `apt` ma za starego Node'a (18) — zainstaluj 22 z NodeSource:
+
+```bash
+sudo apt remove -y nodejs libnode-dev npm
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+(albo bez sudo przez nvm: `nvm install 22`). Skrypt `./kolednik-mac.command` działa tak samo na Linuksie.
 
 ```sh
 git clone https://github.com/imbirwmiodzie/kolednik.git
